@@ -134,4 +134,118 @@ def populate_tenis():
                     image = "http:" + tp.find('img', attrs={'class': 'ico-bandera'}).get("src")
                 #print name, country, image
                 Equipo.objects.create(name=name, image=image, country=country, sport=tenis)
+                
+def noticias_futbol():
+    url= "http://www.marca.com/futbol.html"
+    page = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(page, 'html.parser')
+    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
+        title = noticias.find('h3')
+        if title != None:
+            url2 = title.find('a').get('href')
+            #print url2
+            #print title.get_text()
+            page2 = urllib2.urlopen(url2).read()
+            soup2 = BeautifulSoup(page2, 'html.parser')
+            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+            if stripdate != None:
+                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                #print moment
+            for row in soup2.find_all('div',attrs={'class':'row'}):
+                for cuerpo in row.find_all('p'):
+                    body = cuerpo.get_text()
+                    #print body
+        #link = noticias.find_all('a',title = True)
+        #print link
 
+def noticias_tenis():
+    url= "http://www.marca.com/tenis.html?intcmp=MENUPROD&s_kw=tenis"
+    page = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(page, 'html.parser')
+    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
+        title = noticias.find('h3')
+        if title != None:
+            url2 = title.find('a').get('href')
+            #print url2
+            #print title.get_text()
+            page2 = urllib2.urlopen(url2).read()
+            soup2 = BeautifulSoup(page2, 'html.parser')
+            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+            if stripdate != None:
+                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                #print moment
+            for row in soup2.find_all('div',attrs={'class':'row'}):
+                for cuerpo in row.find_all('p'):
+                    body = cuerpo.get_text()
+                    #print body
+
+def noticias_baloncesto():
+    url= "http://www.marca.com/baloncesto.html?intcmp=MENUPROD&s_kw=baloncesto"
+    page = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(page, 'html.parser')
+    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
+        title = noticias.find('h3')
+        if title != None:
+            url2 = title.find('a').get('href')
+            #print url2
+            #print title.get_text()
+            page2 = urllib2.urlopen(url2).read()
+            soup2 = BeautifulSoup(page2, 'html.parser')
+            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+            if stripdate != None:
+                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                #print moment
+            for row in soup2.find_all('div',attrs={'class':'row'}):
+                for cuerpo in row.find_all('p'):
+                    body = cuerpo.get_text()
+                    #print body
+                    
+def noticias_f1():
+    url= "http://www.marca.com/motor/formula1.html?intcmp=MENUPROD&s_kw=formula-1"
+    page = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(page, 'html.parser')
+    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
+        title = noticias.find('h3')
+        if title != None:
+            url2 = title.find('a').get('href')
+            #print url2
+            #print title.get_text()
+            page2 = urllib2.urlopen(url2).read()
+            soup2 = BeautifulSoup(page2, 'html.parser')
+            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+            if stripdate != None:
+                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                #print moment
+            for row in soup2.find_all('div',attrs={'class':'row'}):
+                for cuerpo in row.find_all('p'):
+                    body = cuerpo.get_text()
+                    #print body
+        
+        
+def noticias_moto():
+    url= "http://www.marca.com/motor/motogp.html?intcmp=MENUPROD&s_kw=moto-gp"
+    page = urllib2.urlopen(url).read()
+    soup = BeautifulSoup(page, 'html.parser')
+    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
+        title = noticias.find('h3')
+        if title != None:
+            url2 = title.find('a').get('href')
+            #print url2
+            #print title.get_text()
+            page2 = urllib2.urlopen(url2).read()
+            soup2 = BeautifulSoup(page2, 'html.parser')
+            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+            if stripdate != None:
+                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                #print moment
+            for row in soup2.find_all('div',attrs={'class':'row'}):
+                for cuerpo in row.find_all('p'):
+                    body = cuerpo.get_text()
+                    #print body
+                    
+def try_parsing_date(text):
+    for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y','%d-%m-%Y','%d/%m/%Y %H:%M','%d-%m-%Y %H:%M'):
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            pass
