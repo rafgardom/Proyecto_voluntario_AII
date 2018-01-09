@@ -113,7 +113,7 @@ def set_profile(request):
         teams = usuario.favourite_teams
 
         #TODO voy por el la gestion del perfil. Primero muestro el perfil ya definido en plan los equipos favoritos y sus amigos. Lo proximo es en este mismo metodo poner el añadir amigos/equipos favoritos
-
+        #TODO prueba de subida a git
 
         return render_to_response('main.html', {'db_status': "Equipos y deportes generados", 'user': usuario})
 
