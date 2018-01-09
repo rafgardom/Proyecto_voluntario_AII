@@ -1,0 +1,31 @@
+{% extends 'main.html' %}
+
+{% block titulo_apartado %} Introduzca el identificador de usuario {% endblock %}
+
+{% block contenido %}
+
+    <form id="formulario" method ="post" enctype="multipart/form-data" action="">{% csrf_token %}
+        <table>
+            {{formulario}}
+        </table>
+        <br/>
+        <p><input type="submit" value="Buscar"></p>
+    </form>
+
+    {% if result %}
+        <br/>
+        <p><strong><h2>Libros leídos</h2></strong></p>
+        <br/>
+        {% for entry in result %}
+            <ul>
+                <div style="border-color: dodgerblue; border-style: solid">
+                    <li><h4>Título: {{entry.libro.titulo}}</h4></li>
+                    <li><h4>ISBN: {{entry.libro.ISBN}}</h4></li>
+                    <li><h4>Puntuación: {{entry.puntuacion}}</h4></li>
+               </div>
+            </ul>
+        {% endfor %}
+    {% endif %}
+
+
+{% endblock %}

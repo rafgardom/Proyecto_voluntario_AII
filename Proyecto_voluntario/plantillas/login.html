@@ -1,0 +1,18 @@
+{% extends 'main.html' %}
+
+{% block titulo_apartado %} Login {% endblock %}
+
+{% block contenido %}
+
+    <form id="formulario" method ="post" enctype="multipart/form-data" action="">{% csrf_token %}
+        <table>
+            {{formulario}}
+           
+        </table>
+
+        <p><input type="submit" value="Ingresar"></p>
+    </form>
+
+    <a href="/create_account/">No tengo cuenta de usuario</a>
+
+{% endblock %}

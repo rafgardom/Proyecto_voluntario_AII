@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+        <title>Practica sistema de recomendacion</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<div style="background-color:lightblue">
+    {% if request.user.is_authenticated  %}
+        Bienvenido {{ request.user }}
+    {% endif %}
+    {% if  not request.user.is_authenticated  %}
+        Bienvenido usuario anónimo
+    {% endif %}
+</div>
+
+    <div>
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="/">Inicio</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/admin/">Admin view</a></li>
+                {% if request.user.is_staff%}
+                    <li><a href="/populateTeams/">Populate equipos</a></li>
+                {% endif %}
+                {% if not request.user.is_authenticated%}
+                    <li><a href="/login/">Ingresar</a></li>
+                {% endif %}
+                {% if request.user.is_authenticated and not request.user.is_staff%}
+                    <li><a href="/my_news/">Mis noticias</a></li>
+                    <li><a href="/profile/">Perfil</a></li>
+                {% endif %}
+                {% if request.user.is_authenticated%}
+                    <li><a href="/cerrar_sesion/">Cerrar sesion</a></li>
+                {% endif %}
+            </ul>
+          </div>
+        </nav>
+
+        <h3>{% block titulo_apartado %}{% endblock %}</h3>
+
+        {% block contenido %}
+        {% endblock %}
+
+    </div>
+
+
+    <br/>
+    {% if db_status%}
+        {{ db_status }}
+    {% endif %}
+
+</body>
+</html>
