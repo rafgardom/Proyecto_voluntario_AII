@@ -99,7 +99,7 @@ def create_account(request):
         return result
 
     except:
-        return render_to_response('error.html',
+        return render_to_response('error.html', {'request':request},
                                   context_instance=RequestContext(request))
 
 def manage_profile(request):
@@ -118,6 +118,35 @@ def manage_profile(request):
     return render_to_response('manage_profile.html', {'teams':teams, 'friends':friends, 'request': request})
 
     '''except:
-        return render_to_response('error.html', {'user':usuario},
+        return render_to_response('error.html', {'request':request},
                                     context_instance=RequestContext(request))'''
 
+def delete_friend(request, id):
+    try:
+        friend = Usuario.objects.get(id = id)
+        user = request.user
+        usuario = user.usuario
+        usuario.friends.remove(friend)
+
+        teams = usuario.favourite_teams
+        friends = usuario.friends
+
+        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+def delete_team(request, id):
+    try:
+        team = Equipo.objects.get(id = id)
+        user = request.user
+        usuario = user.usuario
+        usuario.favourite_teams.remove(team)
+
+        teams = usuario.favourite_teams
+        friends = usuario.friends
+
+        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))

@@ -32,4 +32,10 @@ urlpatterns = patterns('',
 
     #Manage profile
     url(r'^profile/$','principal.views.manage_profile'),
+
+    #Delete friend
+    url(r'^delete_friend/(?P<id>\d+)/$', 'principal.views.delete_friend', name="delete_friend"),
+
+    #Delete team
+    url(r'^delete_team/(?P<id>\d+)/$', 'principal.views.delete_team', name="delete_team"),
 )
