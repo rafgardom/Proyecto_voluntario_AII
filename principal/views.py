@@ -114,6 +114,7 @@ def set_profile(request):
 
         #TODO voy por el la gestion del perfil. Primero muestro el perfil ya definido en plan los equipos favoritos y sus amigos. Lo proximo es en este mismo metodo poner el añadir amigos/equipos favoritos
 
+        #TODO Gestion de amigos: comprobar que el usuario en cuestion no se añade a amigo a si mismo
         return render_to_response('main.html', {'db_status': "Equipos y deportes generados", 'user': usuario})
 
     except:
