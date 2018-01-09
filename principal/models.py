@@ -12,9 +12,9 @@ class Usuario(models.Model):
 
     #Relationships
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    favourite_notices = models.ManyToManyField("Noticia")
-    favourite_teams = models.ManyToManyField("Equipo")
-    friends = models.ForeignKey("Usuario", null=True)
+    favourite_notices = models.ManyToManyField("Noticia", blank=True)
+    favourite_teams = models.ManyToManyField("Equipo", blank=True)
+    friends = models.ManyToManyField("Usuario", blank=True)
 
     def __unicode__(self):
         return self.user_name

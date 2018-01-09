@@ -29,4 +29,7 @@ urlpatterns = patterns('',
 
     #Cerrar sesion
     url(r'^cerrar_sesion/$','principal.views.cerrar_sesion'),
+
+    #Manage profile
+    url(r'^profile/$','principal.views.manage_profile'),
 )

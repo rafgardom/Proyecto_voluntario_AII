@@ -27,7 +27,7 @@ def populate_teams(request):
     util.populate_equipos_motogp()
     util.populate_tenis()
 
-    return render_to_response('main.html', {'db_status': "Equipos y deportes generados", 'user':usuario})
+    return render_to_response('main.html', {'db_status': "Equipos y deportes generados", 'request':request})
 
 @login_required(login_url='/ingresar')
 def cerrar_sesion(request):
@@ -83,7 +83,6 @@ def create_account(request):
                                                        surname=cd.get('surname'),
                                                        name=cd.get('name'),
                                                        email=cd.get('email'),
-                                                       password=cd.get('password'),
                                                        address=cd.get('address'))
                     return HttpResponseRedirect('/')
                 except Exception as e:
@@ -95,7 +94,7 @@ def create_account(request):
             formulario = forms.create_user()
 
         if fail == False:
-            result = render_to_response('create_user.html', {'formulario': formulario, 'user':usuario},
+            result = render_to_response('create_user.html', {'formulario': formulario, 'request':request},
                                         context_instance=RequestContext(request))
         return result
 
@@ -103,21 +102,22 @@ def create_account(request):
         return render_to_response('error.html',
                                   context_instance=RequestContext(request))
 
-def set_profile(request):
+def manage_profile(request):
     usuario = request.user.is_authenticated()
-    try:
-        if usuario is not False or request.user.is_staff:
-            raise Exception('Accion no permitida')
-        user = request.user
-        usuario = Usuario.objects.get(user = user)
-        teams = usuario.favourite_teams
+    #try:
+    '''if usuario is not False or request.user.is_staff:
+        raise Exception('Accion no permitida')'''
+    user = request.user
+    usuario = Usuario.objects.get(user = user)
+    teams = usuario.favourite_teams
+    friends = usuario.friends
 
-        #TODO voy por el la gestion del perfil. Primero muestro el perfil ya definido en plan los equipos favoritos y sus amigos. Lo proximo es en este mismo metodo poner el añadir amigos/equipos favoritos
+    #TODO voy por el la gestion del perfil. Primero muestro el perfil ya definido en plan los equipos favoritos y sus amigos. Lo proximo es en este mismo metodo poner el aniadir amigos/equipos favoritos
 
-        #TODO Gestion de amigos: comprobar que el usuario en cuestion no se añade a amigo a si mismo
-        return render_to_response('main.html', {'db_status': "Equipos y deportes generados", 'user': usuario})
+    #TODO Gestion de amigos: comprobar que el usuario en cuestion no se aniade a amigo a si mismo
+    return render_to_response('manage_profile.html', {'teams':teams, 'friends':friends, 'request': request})
 
-    except:
+    '''except:
         return render_to_response('error.html', {'user':usuario},
-                                    context_instance=RequestContext(request))
+                                    context_instance=RequestContext(request))'''
 
