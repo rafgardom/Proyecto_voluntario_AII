@@ -1,0 +1,45 @@
+{% extends 'main.html' %}
+
+{% block titulo_apartado %} Gestión del perfil {% endblock %}
+
+{% block contenido %}
+
+
+    <br/>
+    <p><strong><h2>Lista de amigos</h2></strong></p>
+    <br/>
+
+    {% for friend in friends.all%}
+        <div class="list-group">
+          <a href="#" class="list-group-item active">
+              <h4 class="list-group-item-heading">{{ friend.user_name }}</h4>
+              <p class="list-group-item-text">Nombre: {{ friend.name }}</p>
+              <p class="list-group-item-text">Email: {{ friend.email }}</p>
+          </a>
+        </div>
+
+    {% endfor %}
+
+    <a href="/add_friend/">Añadir amigos</a>
+
+    <br/>
+    <p><strong><h2>Lista de equipos favoritos</h2></strong></p>
+    <br/>
+    {% for team in teams.all%}
+        <div class="list-group">
+          <a href="#" class="list-group-item active">
+              <h4 class="list-group-item-heading"> <img src="{{ team.image }}" height="3%" width="3%"/>{{ team.name }} ({{ team.sport.name }})</h4>
+              <p class="list-group-item-text">{{ team.country }}</p>
+          </a>
+        </div>
+
+    {% endfor %}
+
+
+
+
+    <a href="/add_teams/">Añadir equipos</a>
+
+
+
+{% endblock %}
