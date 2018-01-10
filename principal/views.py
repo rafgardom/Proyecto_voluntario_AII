@@ -26,6 +26,7 @@ def populate_teams(request):
     util.populate_equipos_baloncesto()
     util.populate_equipos_f1()
     util.populate_equipos_motogp()
+    util.populate_tenis()
 
     return render_to_response('main.html', {'db_status': "Equipos y deportes generados", 'request':request})
 
@@ -61,9 +62,13 @@ def ingresar(request):
                         login(request, acceso)
                         return HttpResponseRedirect('/')
                     else:
-                        return HttpResponseRedirect('/')
+
+                        formulario = AuthenticationForm()
+                        return render_to_response('login.html',
+                                                  {'formulario': formulario, 'bad_login': True, 'request': request}, context_instance=RequestContext(request))
                 else:
-                    return HttpResponseRedirect('/')
+                    formulario = AuthenticationForm()
+                    return render_to_response('login.html', {'formulario':formulario,'bad_login': True, 'request': request}, context_instance=RequestContext(request))
             else:
                 return HttpResponseRedirect('/')
         else:

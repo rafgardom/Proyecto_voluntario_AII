@@ -4,6 +4,12 @@
 
 {% block contenido %}
 
+    {% if bad_login %}
+        <div class="alert alert-warning">
+            <strong>Ha ocurrido un error</strong> Asegúrese que ha introducido correctamente las credenciales de usuario.
+        </div>
+    {% endif %}
+
     <form id="formulario" method ="post" enctype="multipart/form-data" action="">{% csrf_token %}
         <table>
             {{formulario}}
