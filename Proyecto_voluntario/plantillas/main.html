@@ -4,7 +4,7 @@
 
     <meta charset="UTF-8">
 
-        <title>Practica sistema de recomendacion</title>
+        <title>Práctica voluntaria</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -29,7 +29,9 @@
               <a class="navbar-brand" href="/">Inicio</a>
             </div>
             <ul class="nav navbar-nav">
-                <li><a href="/admin/">Admin view</a></li>
+                {% if request.user.is_staff%}
+                    <li><a href="/admin/">Admin view</a></li>
+                {% endif %}
                 {% if request.user.is_staff%}
                     <li><a href="/populateTeams/">Populate equipos</a></li>
                 {% endif %}

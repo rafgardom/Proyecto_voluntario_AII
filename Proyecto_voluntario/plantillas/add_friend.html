@@ -1,0 +1,60 @@
+{% extends 'main.html' %}
+
+{% block titulo_apartado %} Añadir amigo/s {% endblock %}
+
+{% block contenido %}
+{% if users %}
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Nombre de usuario</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Gestionar amigo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.user_name }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                <a href ={% url add_friend user.id  %} class='btn btn-primary'>
+                        Añadir amigo
+                </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+{% endif %}
+
+{% if not users %}
+    No hay amigos que añadir. Tiene como amigos a todos los usuarios del sistema
+{% endif %}
+
+{% if users.has_other_pages %}
+  <ul class="pagination">
+    {% if users.has_previous %}
+      <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in users.paginator.page_range %}
+      {% if users.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if users.has_next %}
+      <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+
+
+{% endblock %}

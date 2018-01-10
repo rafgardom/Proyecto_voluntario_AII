@@ -1,0 +1,31 @@
+{% extends 'main.html' %}
+
+{% block titulo_apartado %} Deportes {% endblock %}
+
+{% block contenido %}
+
+    <p><strong><h2>Lista de deportes</h2></strong></p>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sport in sports %}
+          <tr>
+            <td>{{ sport.name }}</td>
+            <td>
+                 <a href ={% url selected_sport sport.id  %} class='btn btn-primary'>
+                            Seleccionar deporte
+                 </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+{% endblock %}
+

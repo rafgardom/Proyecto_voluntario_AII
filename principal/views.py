@@ -10,6 +10,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def main_view(request):
@@ -99,25 +100,193 @@ def create_account(request):
         return result
 
     except:
-        return render_to_response('error.html',
+        return render_to_response('error.html', {'request':request},
                                   context_instance=RequestContext(request))
 
 def manage_profile(request):
     usuario = request.user.is_authenticated()
-    #try:
-    '''if usuario is not False or request.user.is_staff:
-        raise Exception('Accion no permitida')'''
+    try:
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
+        user = request.user
+        usuario = Usuario.objects.get(user = user)
+        teams = usuario.favourite_teams
+        friends = usuario.friends
+
+        return render_to_response('manage_profile.html', {'teams':teams, 'friends':friends, 'request': request})
+
+    except:
+        return render_to_response('error.html', {'request':request},
+                                    context_instance=RequestContext(request))
+
+def delete_friend(request, id):
+    try:
+        friend = Usuario.objects.get(id = id)
+        user = request.user
+        usuario = user.usuario
+        usuario.friends.remove(friend)
+
+        teams = usuario.favourite_teams
+        friends = usuario.friends
+
+        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+def delete_team(request, id):
+    try:
+        team = Equipo.objects.get(id = id)
+        user = request.user
+        usuario = user.usuario
+        usuario.favourite_teams.remove(team)
+
+        teams = usuario.favourite_teams
+        friends = usuario.friends
+
+        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+def add_friend(request, id):
+    try:
+        friend = Usuario.objects.get(id = id)
+        user = request.user
+        usuario = user.usuario
+        usuario.friends.add(friend)
+
+        teams = usuario.favourite_teams
+        friends = usuario.friends
+
+        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+def add_team(request, id):
+    try:
+        team = Equipo.objects.get(id = id)
+        user = request.user
+        usuario = user.usuario
+        usuario.favourite_teams.add(team)
+
+        teams = usuario.favourite_teams
+        friends = usuario.friends
+
+        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+
+def listing_users(request):
+
     user = request.user
-    usuario = Usuario.objects.get(user = user)
-    teams = usuario.favourite_teams
+    usuario = user.usuario
     friends = usuario.friends
+    user_list = Usuario.objects.all().exclude(id=usuario.id).exclude(id__in=[friend.id for friend in friends.all()])
 
-    #TODO voy por el la gestion del perfil. Primero muestro el perfil ya definido en plan los equipos favoritos y sus amigos. Lo proximo es en este mismo metodo poner el aniadir amigos/equipos favoritos
+    user_list.exclude(id = usuario.id)
+    user_list.exclude(id__in=[friend.id for friend in friends.all()])
 
-    #TODO Gestion de amigos: comprobar que el usuario en cuestion no se aniade a amigo a si mismo
-    return render_to_response('manage_profile.html', {'teams':teams, 'friends':friends, 'request': request})
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(user_list, 10)
+    try:
+        users = paginator.page(page)
+    except PageNotAnInteger:
+        users = paginator.page(1)
+    except EmptyPage:
+        users = paginator.page(paginator.num_pages)
+
+    return render_to_response('add_friend.html', {'users': users, 'request': request})
+
+def listing_sports(request):
+    usuario = request.user.is_authenticated()
+    #try:
+    if usuario is False or request.user.is_staff:
+        raise Exception('Accion no permitida')
+
+    sports = Deporte.objects.all()
+
+    return render_to_response('select_sport.html', {'sports': sports, 'request': request})
 
     '''except:
-        return render_to_response('error.html', {'user':usuario},
-                                    context_instance=RequestContext(request))'''
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))'''
 
+
+def selected_sport(request, id):
+    try:
+        sport = Deporte.objects.get(id = id)
+        user = request.user
+        usuario = user.usuario
+
+        teams_list = sport.equipo_set.exclude(id__in=[team.id for team in usuario.favourite_teams.all()])
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(teams_list, 10)
+        try:
+            teams = paginator.page(page)
+        except PageNotAnInteger:
+            teams = paginator.page(1)
+        except EmptyPage:
+            teams = paginator.page(paginator.num_pages)
+
+        return render_to_response('add_team.html', {'teams': teams, 'request': request})
+
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+
+def listing_teams(request):
+
+    user = request.user
+    usuario = user.usuario
+    football = Deporte.objects.get(name = "Futbol")
+    tennis = Deporte.objects.get(name="Tenis")
+    motogp = Deporte.objects.get(name="Moto GP")
+    formula_one = Deporte.objects.get(name="Formula 1")
+    basket = Deporte.objects.get(name="Baloncesto")
+
+    football_teams = football.equipo_set.exclude(id__in=[team.id for team in usuario.favourite_teams.all()])
+    tennis_teams = tennis.equipo_set.exclude(id__in=[team.id for team in usuario.favourite_teams.all()])
+    motogp_teams = motogp.equipo_set.exclude(id__in=[team.id for team in usuario.favourite_teams.all()])
+    f1_teams = formula_one.equipo_set.exclude(id__in=[team.id for team in usuario.favourite_teams.all()])
+    basket_teams = basket.equipo_set.exclude(id__in=[team.id for team in usuario.favourite_teams.all()])
+
+    football_page = request.GET.get('page', 1)
+    tennis_page = request.GET.get('page', 1)
+    motogp_page = request.GET.get('page', 1)
+    f1_page = request.GET.get('page', 1)
+    basket_page = request.GET.get('page', 1)
+
+
+    football_paginator = Paginator(football_teams, 10)
+    tennis_paginator = Paginator(tennis_teams, 10)
+    motogp_paginator = Paginator(motogp_teams, 10)
+    f1_paginator = Paginator(f1_teams, 10)
+    basket_paginator = Paginator(basket_teams, 10)
+    try:
+        footballs = football_paginator.page(football_page)
+        tennises = tennis_paginator.page(tennis_page)
+        motogps = motogp_paginator.page(motogp_page)
+        fones = f1_paginator.page(f1_page)
+        baskets = basket_paginator.page(basket_page)
+    except PageNotAnInteger:
+        footballs = football_paginator.page(1)
+        tennises = tennis_paginator.page(1)
+        motogps = motogp_paginator.page(1)
+        fones = f1_paginator.page(1)
+        baskets = basket_paginator.page(1)
+    except EmptyPage:
+        footballs = football_paginator.page(football_paginator.num_pages)
+        tennises = tennis_paginator.page(tennis_paginator.num_pages)
+        motogps = motogp_paginator.page(motogp_paginator.num_pages)
+        fones = f1_paginator.page(f1_paginator.num_pages)
+        baskets = basket_paginator.page(basket_paginator.num_pages)
+
+    return render_to_response('add_team.html', {'footballs': footballs, 'tennises': tennises, 'motogps': motogps,
+                                                'fones': fones, 'baskets': baskets, 'request': request})

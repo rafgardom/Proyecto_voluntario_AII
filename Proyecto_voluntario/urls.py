@@ -32,4 +32,30 @@ urlpatterns = patterns('',
 
     #Manage profile
     url(r'^profile/$','principal.views.manage_profile'),
+
+    #Delete friend
+    url(r'^delete_friend/(?P<id>\d+)/$', 'principal.views.delete_friend', name="delete_friend"),
+
+    #Delete team
+    url(r'^delete_team/(?P<id>\d+)/$', 'principal.views.delete_team', name="delete_team"),
+
+    #List users
+    url(r'^list_users/$','principal.views.listing_users'),
+
+    #List teams
+    url(r'^list_teams/$','principal.views.listing_teams'),
+
+    #Select sports
+    url(r'^select_sports/$','principal.views.listing_sports'),
+
+    #Select sport
+    url(r'^selected_sport/(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport"),
+
+    #Add friend
+    url(r'^add_friend/(?P<id>\d+)/$', 'principal.views.add_friend', name="add_friend"),
+
+    #Add team
+    url(r'^add_team/(?P<id>\d+)/$', 'principal.views.add_team', name="add_team"),
+
+
 )
