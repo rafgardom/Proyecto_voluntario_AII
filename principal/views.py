@@ -103,6 +103,7 @@ def create_account(request):
         return render_to_response('error.html', {'request':request},
                                   context_instance=RequestContext(request))
 
+@login_required(login_url='/ingresar')
 def manage_profile(request):
     usuario = request.user.is_authenticated()
     try:
@@ -135,6 +136,7 @@ def manage_profile(request):
         return render_to_response('error.html', {'request':request},
                                     context_instance=RequestContext(request))
 
+@login_required(login_url='/ingresar')
 def delete_friend(request, id):
     try:
         friend = Usuario.objects.get(id = id)
@@ -166,6 +168,7 @@ def delete_friend(request, id):
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
 
+@login_required(login_url='/ingresar')
 def delete_team(request, id):
     try:
         team = Equipo.objects.get(id = id)
@@ -197,6 +200,7 @@ def delete_team(request, id):
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
 
+@login_required(login_url='/ingresar')
 def add_friend(request, id):
     try:
         friend = Usuario.objects.get(id = id)
@@ -228,6 +232,7 @@ def add_friend(request, id):
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
 
+@login_required(login_url='/ingresar')
 def add_team(request, id):
     try:
         team = Equipo.objects.get(id = id)
@@ -259,7 +264,7 @@ def add_team(request, id):
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
 
-
+@login_required(login_url='/ingresar')
 def listing_users(request):
 
     user = request.user
@@ -282,6 +287,7 @@ def listing_users(request):
 
     return render_to_response('add_friend.html', {'users': users, 'request': request})
 
+@login_required(login_url='/ingresar')
 def listing_sports(request):
     usuario = request.user.is_authenticated()
     try:
@@ -297,6 +303,7 @@ def listing_sports(request):
                                   context_instance=RequestContext(request))
 
 
+@login_required(login_url='/ingresar')
 def selected_sport(request, id):
     try:
         sport = Deporte.objects.get(id = id)
@@ -321,6 +328,7 @@ def selected_sport(request, id):
                                   context_instance=RequestContext(request))
 
 
+@login_required(login_url='/ingresar')
 def listing_teams(request):
 
     user = request.user
