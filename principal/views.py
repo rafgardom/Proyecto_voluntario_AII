@@ -1,7 +1,7 @@
 # Create your views here.
 import util
 from django.shortcuts import render_to_response
-from models import Deporte, Equipo, Usuario
+from models import Deporte, Equipo, Usuario, Noticia
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 import forms
@@ -26,9 +26,18 @@ def populate_teams(request):
     util.populate_equipos_baloncesto()
     util.populate_equipos_f1()
     util.populate_equipos_motogp()
-    util.populate_tenis()
 
     return render_to_response('main.html', {'db_status': "Equipos y deportes generados", 'request':request})
+
+@staff_member_required
+def populate_noticias(request):
+    usuario = request.user.is_authenticated()
+    Noticia.objects.all().delete()
+
+    util.noticias_futbol()
+
+    return render_to_response('main.html', {'db_status': "Noticias generadas", 'request':request})
+
 
 @login_required(login_url='/ingresar')
 def cerrar_sesion(request):

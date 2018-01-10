@@ -20,6 +20,7 @@ urlpatterns = patterns('',
 
     #populate
     url(r'^populateTeams/', 'principal.views.populate_teams', name='Populate equipos'),
+    url(r'^populateNoticias/', 'principal.views.populate_noticias', name='Populate noticias'),
 
     #Create account
     url(r'^create_account/', 'principal.views.create_account', name='Registro'),

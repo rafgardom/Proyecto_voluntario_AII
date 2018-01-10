@@ -1,8 +1,8 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+from datetime import datetime
 
 # Create your models here.
-
 class Usuario(models.Model):
     user_name = models.CharField("Nombre de usuario", unique=True, max_length= 20)
     name = models.CharField(max_length= 100)
@@ -22,7 +22,7 @@ class Usuario(models.Model):
 class Noticia(models.Model):
     title = models.CharField(max_length= 100)
     body = models.TextField()
-    moment = models.DateTimeField()
+    moment = models.DateTimeField(null=True,blank=True)
     url = models.TextField()
 
     def __unicode__(self):

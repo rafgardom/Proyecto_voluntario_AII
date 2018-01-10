@@ -35,6 +35,9 @@
                 {% if request.user.is_staff%}
                     <li><a href="/populateTeams/">Populate equipos</a></li>
                 {% endif %}
+                {% if request.user.is_staff%}
+                    <li><a href="/populateNoticias/">Populate noticias</a></li>
+                {% endif %}
                 {% if not request.user.is_authenticated%}
                     <li><a href="/login/">Ingresar</a></li>
                 {% endif %}

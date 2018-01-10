@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import urllib2, re
-from models import Equipo, Deporte
+from models import Equipo, Deporte, Noticia
+from datetime import datetime
 
 def populate_equipos_futbol():
     futbol = Deporte.objects.create(name="Futbol")
@@ -151,10 +152,13 @@ def noticias_futbol():
             if stripdate != None:
                 moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
                 #print moment
+                if moment == None:
+                    moment = datetime.now()
             for row in soup2.find_all('div',attrs={'class':'row'}):
                 for cuerpo in row.find_all('p'):
                     body = cuerpo.get_text()
                     #print body
+                    Noticia.objects.create(title=title.get_text(),body=body, moment=moment, url=url2)
         #link = noticias.find_all('a',title = True)
         #print link
 
@@ -178,6 +182,7 @@ def noticias_tenis():
                 for cuerpo in row.find_all('p'):
                     body = cuerpo.get_text()
                     #print body
+                    Noticia.objects.create(title=title,body=body, moment=moment, url=url2)
 
 def noticias_baloncesto():
     url= "http://www.marca.com/baloncesto.html?intcmp=MENUPROD&s_kw=baloncesto"
@@ -199,7 +204,8 @@ def noticias_baloncesto():
                 for cuerpo in row.find_all('p'):
                     body = cuerpo.get_text()
                     #print body
-                    
+                    Noticia.objects.create(title=title,body=body, moment=moment, url=url2)
+
 def noticias_f1():
     url= "http://www.marca.com/motor/formula1.html?intcmp=MENUPROD&s_kw=formula-1"
     page = urllib2.urlopen(url).read()
@@ -220,8 +226,8 @@ def noticias_f1():
                 for cuerpo in row.find_all('p'):
                     body = cuerpo.get_text()
                     #print body
-        
-        
+                    Noticia.objects.create(title=title,body=body, moment=moment, url=url2)
+
 def noticias_moto():
     url= "http://www.marca.com/motor/motogp.html?intcmp=MENUPROD&s_kw=moto-gp"
     page = urllib2.urlopen(url).read()
@@ -242,6 +248,7 @@ def noticias_moto():
                 for cuerpo in row.find_all('p'):
                     body = cuerpo.get_text()
                     #print body
+                    Noticia.objects.create(title=title,body=body, moment=moment, url=url2)
                     
 def try_parsing_date(text):
     for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y','%d-%m-%Y','%d/%m/%Y %H:%M','%d-%m-%Y %H:%M'):
