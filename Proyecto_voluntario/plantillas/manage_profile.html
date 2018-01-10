@@ -4,49 +4,121 @@
 
 {% block contenido %}
 
+<p><strong><h2>Lista de amigos</h2></strong></p>
+{% if friends.all %}
 
-    <br/>
-    <p><strong><h2>Lista de amigos</h2></strong></p>
-    <br/>
-
-    {% for friend in friends.all%}
-        <div class="list-group">
-          <a href="#" class="list-group-item active">
-              <h4 class="list-group-item-heading">{{ friend.user_name }}</h4>
-              <p class="list-group-item-text">Nombre: {{ friend.name }}</p>
-              <p class="list-group-item-text">Email: {{ friend.email }}</p>
-              <a href ={% url delete_friend friend.id  %} class='btn btn-primary'>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Nombre de usuario</th>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Gestionar amigo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for friend in friends.all %}
+      <tr>
+        <td>{{ friend.user_name }}</td>
+        <td>{{ friend.name }}</td>
+        <td>{{ friend.email }}</td>
+        <td>
+             <a href ={% url delete_friend friend.id  %} class='btn btn-primary'>
                     Eliminar amigo
-              </a>
-
-          </a>
-        </div>
-
+             </a>
+        </td>
+      </tr>
     {% endfor %}
+  </tbody>
+</table>
+{% endif %}
 
-    <a href="/add_friend/">Añadir amigos</a>
+{% if users.has_other_pages %}
+  <ul class="pagination">
+    {% if users.has_previous %}
+      <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in users.paginator.page_range %}
+      {% if users.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if users.has_next %}
+      <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
 
+{% if not friends.all %}
+    No tiene amigos.
     <br/>
-    <p><strong><h2>Lista de equipos favoritos</h2></strong></p>
-    <br/>
-    {% for team in teams.all%}
-        <div class="list-group">
-              <a href="#" class="list-group-item active">
-                  <h4 class="list-group-item-heading"> <img src="{{ team.image }}" height="3%" width="3%"/>{{ team.name }} ({{ team.sport.name }})</h4>
-                  <p class="list-group-item-text">{{ team.country }}</p>
-              </a>
+{% endif %}
+
+<a href="/list_users/">Añadir amigos</a>
+
+<br/>
+<p><strong><h2>Lista de equipos favoritos</h2></strong></p>
+{% if teams.all %}
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Equipo</th>
+      <th>País</th>
+      <th>Gestionar amigo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for team in teams.all %}
+      <tr>
+        <td><img src="{{ team.image }}" height="3%" width="3%"/>{{ team.name }} ({{ team.sport.name }})</td>
+        <td>{{ team.country }}</td>
+        <td>
              <a href ={% url delete_team team.id  %} class='btn btn-primary'>
                         Eliminar equipo
              </a>
-        </div>
-
+        </td>
+      </tr>
     {% endfor %}
+  </tbody>
+</table>
+{% endif %}
 
+{% if users.has_other_pages %}
+  <ul class="pagination">
+    {% if users.has_previous %}
+      <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in users.paginator.page_range %}
+      {% if users.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if users.has_next %}
+      <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
 
+{% if not teams.all %}
+    No tiene equipos favoritos.
+    <br/>
 
+{% endif %}
 
-    <a href="/add_teams/">Añadir equipos</a>
-
+<a href="/select_sports/">Añadir equipos</a>
 
 
 {% endblock %}
