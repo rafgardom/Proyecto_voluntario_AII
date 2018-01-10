@@ -15,7 +15,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def main_view(request):
     usuario = request.user.is_authenticated()
-    return render_to_response('main.html', {'request':request})
+    return render_to_response('home.html', {'request':request})
 
 @staff_member_required
 def populate_teams(request):
@@ -110,10 +110,26 @@ def manage_profile(request):
             raise Exception('Accion no permitida')
         user = request.user
         usuario = Usuario.objects.get(user = user)
-        teams = usuario.favourite_teams
-        friends = usuario.friends
+        teams = usuario.favourite_teams.all()
+        friends = usuario.friends.all()
 
-        return render_to_response('manage_profile.html', {'teams':teams, 'friends':friends, 'request': request})
+        page1 = request.GET.get('page1', 1)
+        page2 = request.GET.get('page2', 1)
+
+        paginator1 = Paginator(friends, 5)
+        paginator2 = Paginator(teams, 5)
+
+        try:
+            friend_set = paginator1.page(page1)
+            teams_set = paginator2.page(page2)
+        except PageNotAnInteger:
+            friend_set = paginator1.page(1)
+            teams_set = paginator2.page(1)
+        except EmptyPage:
+            friend_set = paginator1.page(paginator1.num_pages)
+            teams_set = paginator2.page(paginator2.num_pages)
+
+        return render_to_response('manage_profile.html', {'teams':teams_set, 'friends':friend_set, 'request': request})
 
     except:
         return render_to_response('error.html', {'request':request},
@@ -126,10 +142,26 @@ def delete_friend(request, id):
         usuario = user.usuario
         usuario.friends.remove(friend)
 
-        teams = usuario.favourite_teams
-        friends = usuario.friends
+        teams = usuario.favourite_teams.all()
+        friends = usuario.friends.all()
 
-        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+        page1 = request.GET.get('page1', 1)
+        page2 = request.GET.get('page2', 1)
+
+        paginator1 = Paginator(friends, 5)
+        paginator2 = Paginator(teams, 5)
+
+        try:
+            friend_set = paginator1.page(page1)
+            team_set = paginator2.page(page2)
+        except PageNotAnInteger:
+            friend_set = paginator1.page(1)
+            team_set = paginator2.page(1)
+        except EmptyPage:
+            friend_set = paginator1.page(paginator1.num_pages)
+            team_set = paginator2.page(paginator2.num_pages)
+
+        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
@@ -141,10 +173,26 @@ def delete_team(request, id):
         usuario = user.usuario
         usuario.favourite_teams.remove(team)
 
-        teams = usuario.favourite_teams
-        friends = usuario.friends
+        teams = usuario.favourite_teams.all()
+        friends = usuario.friends.all()
 
-        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+        page1 = request.GET.get('page1', 1)
+        page2 = request.GET.get('page2', 1)
+
+        paginator1 = Paginator(friends, 5)
+        paginator2 = Paginator(teams, 5)
+
+        try:
+            friend_set = paginator1.page(page1)
+            team_set = paginator2.page(page2)
+        except PageNotAnInteger:
+            friend_set = paginator1.page(1)
+            team_set = paginator2.page(1)
+        except EmptyPage:
+            friend_set = paginator1.page(paginator1.num_pages)
+            team_set = paginator2.page(paginator2.num_pages)
+
+        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
@@ -156,10 +204,26 @@ def add_friend(request, id):
         usuario = user.usuario
         usuario.friends.add(friend)
 
-        teams = usuario.favourite_teams
-        friends = usuario.friends
+        teams = usuario.favourite_teams.all()
+        friends = usuario.friends.all()
 
-        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+        page1 = request.GET.get('page1', 1)
+        page2 = request.GET.get('page2', 1)
+
+        paginator1 = Paginator(friends, 5)
+        paginator2 = Paginator(teams, 5)
+
+        try:
+            friend_set = paginator1.page(page1)
+            team_set = paginator2.page(page2)
+        except PageNotAnInteger:
+            friend_set = paginator1.page(1)
+            team_set = paginator2.page(1)
+        except EmptyPage:
+            friend_set = paginator1.page(paginator1.num_pages)
+            team_set = paginator2.page(paginator2.num_pages)
+
+        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
@@ -171,10 +235,26 @@ def add_team(request, id):
         usuario = user.usuario
         usuario.favourite_teams.add(team)
 
-        teams = usuario.favourite_teams
-        friends = usuario.friends
+        teams = usuario.favourite_teams.all()
+        friends = usuario.friends.all()
 
-        return render_to_response('manage_profile.html', {'teams': teams, 'friends': friends, 'request': request})
+        page1 = request.GET.get('page1', 1)
+        page2 = request.GET.get('page2', 1)
+
+        paginator1 = Paginator(friends, 5)
+        paginator2 = Paginator(teams, 5)
+
+        try:
+            friend_set = paginator1.page(page1)
+            team_set = paginator2.page(page2)
+        except PageNotAnInteger:
+            friend_set = paginator1.page(1)
+            team_set = paginator2.page(1)
+        except EmptyPage:
+            friend_set = paginator1.page(paginator1.num_pages)
+            team_set = paginator2.page(paginator2.num_pages)
+
+        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
@@ -204,17 +284,17 @@ def listing_users(request):
 
 def listing_sports(request):
     usuario = request.user.is_authenticated()
-    #try:
-    if usuario is False or request.user.is_staff:
-        raise Exception('Accion no permitida')
+    try:
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
 
-    sports = Deporte.objects.all()
+        sports = Deporte.objects.all()
 
-    return render_to_response('select_sport.html', {'sports': sports, 'request': request})
+        return render_to_response('select_sport.html', {'sports': sports, 'request': request})
 
-    '''except:
+    except:
         return render_to_response('error.html', {'request': request},
-                                  context_instance=RequestContext(request))'''
+                                  context_instance=RequestContext(request))
 
 
 def selected_sport(request, id):

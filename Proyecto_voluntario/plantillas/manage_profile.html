@@ -5,7 +5,7 @@
 {% block contenido %}
 
 <p><strong><h2>Lista de amigos</h2></strong></p>
-{% if friends.all %}
+{% if friends %}
 
 <table class="table table-bordered">
   <thead>
@@ -13,18 +13,18 @@
       <th>Nombre de usuario</th>
       <th>Nombre</th>
       <th>Email</th>
-      <th>Gestionar amigo</th>
+      <th>Gestionar</th>
     </tr>
   </thead>
   <tbody>
-    {% for friend in friends.all %}
+    {% for friend in friends %}
       <tr>
         <td>{{ friend.user_name }}</td>
         <td>{{ friend.name }}</td>
         <td>{{ friend.email }}</td>
         <td>
              <a href ={% url delete_friend friend.id  %} class='btn btn-primary'>
-                    Eliminar amigo
+                    Eliminar
              </a>
         </td>
       </tr>
@@ -33,29 +33,29 @@
 </table>
 {% endif %}
 
-{% if users.has_other_pages %}
+{% if friends.has_other_pages %}
   <ul class="pagination">
-    {% if users.has_previous %}
-      <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+    {% if friends.has_previous %}
+      <li><a href="?page1={{ users.previous_page_number }}">&laquo;</a></li>
     {% else %}
       <li class="disabled"><span>&laquo;</span></li>
     {% endif %}
-    {% for i in users.paginator.page_range %}
-      {% if users.number == i %}
+    {% for i in friends.paginator.page_range %}
+      {% if friends.number == i %}
         <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
       {% else %}
-        <li><a href="?page={{ i }}">{{ i }}</a></li>
+        <li><a href="?page1={{ i }}">{{ i }}</a></li>
       {% endif %}
     {% endfor %}
-    {% if users.has_next %}
-      <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+    {% if friends.has_next %}
+      <li><a href="?page1={{ friends.next_page_number }}">&raquo;</a></li>
     {% else %}
       <li class="disabled"><span>&raquo;</span></li>
     {% endif %}
   </ul>
 {% endif %}
 
-{% if not friends.all %}
+{% if not friends %}
     No tiene amigos.
     <br/>
 {% endif %}
@@ -64,24 +64,24 @@
 
 <br/>
 <p><strong><h2>Lista de equipos favoritos</h2></strong></p>
-{% if teams.all %}
+{% if teams %}
 
 <table class="table table-bordered">
   <thead>
     <tr>
       <th>Equipo</th>
       <th>País</th>
-      <th>Gestionar amigo</th>
+      <th>Gestionar</th>
     </tr>
   </thead>
   <tbody>
-    {% for team in teams.all %}
+    {% for team in teams %}
       <tr>
         <td><img src="{{ team.image }}" height="3%" width="3%"/>{{ team.name }} ({{ team.sport.name }})</td>
         <td>{{ team.country }}</td>
         <td>
              <a href ={% url delete_team team.id  %} class='btn btn-primary'>
-                        Eliminar equipo
+                        Eliminar
              </a>
         </td>
       </tr>
@@ -90,34 +90,35 @@
 </table>
 {% endif %}
 
-{% if users.has_other_pages %}
+{% if teams.has_other_pages %}
   <ul class="pagination">
-    {% if users.has_previous %}
-      <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+    {% if teams.has_previous %}
+      <li><a href="?page2={{ teams.previous_page_number }}">&laquo;</a></li>
     {% else %}
       <li class="disabled"><span>&laquo;</span></li>
     {% endif %}
-    {% for i in users.paginator.page_range %}
-      {% if users.number == i %}
+    {% for i in teams.paginator.page_range %}
+      {% if teams.number == i %}
         <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
       {% else %}
-        <li><a href="?page={{ i }}">{{ i }}</a></li>
+        <li><a href="?page2={{ i }}">{{ i }}</a></li>
       {% endif %}
     {% endfor %}
-    {% if users.has_next %}
-      <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+    {% if teams.has_next %}
+      <li><a href="?page2={{ teams.next_page_number }}">&raquo;</a></li>
     {% else %}
       <li class="disabled"><span>&raquo;</span></li>
     {% endif %}
   </ul>
 {% endif %}
 
-{% if not teams.all %}
+{% if not teams %}
     No tiene equipos favoritos.
     <br/>
 
 {% endif %}
 
+<br/>
 <a href="/select_sports/">Añadir equipos</a>
 
 
