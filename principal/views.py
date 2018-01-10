@@ -161,7 +161,7 @@ def delete_friend(request, id):
             friend_set = paginator1.page(paginator1.num_pages)
             team_set = paginator2.page(paginator2.num_pages)
 
-        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request})
+        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request, 'friend_delete_good': True})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
@@ -192,7 +192,7 @@ def delete_team(request, id):
             friend_set = paginator1.page(paginator1.num_pages)
             team_set = paginator2.page(paginator2.num_pages)
 
-        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request})
+        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request, 'team_delete_good': True})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
@@ -223,7 +223,7 @@ def add_friend(request, id):
             friend_set = paginator1.page(paginator1.num_pages)
             team_set = paginator2.page(paginator2.num_pages)
 
-        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request})
+        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request, 'friend_add_good': True})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
@@ -254,7 +254,7 @@ def add_team(request, id):
             friend_set = paginator1.page(paginator1.num_pages)
             team_set = paginator2.page(paginator2.num_pages)
 
-        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request})
+        return render_to_response('manage_profile.html', {'teams': team_set, 'friends': friend_set, 'request': request, 'team_add_good': True})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))

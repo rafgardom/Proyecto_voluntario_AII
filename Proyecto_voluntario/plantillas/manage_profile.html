@@ -4,6 +4,22 @@
 
 {% block contenido %}
 
+{% if team_add_good %}
+    <div class="alert alert-success">Equipo añadido correctamente</div>
+{% endif %}
+
+{% if team_delete_good %}
+    <div class="alert alert-success">Equipo eliminado correctamente</div>
+{% endif %}
+
+{% if friend_add_good %}
+    <div class="alert alert-success">Amigo añadido correctamente</div>
+{% endif %}
+
+{% if friend_delete_good %}
+    <div class="alert alert-success">Amigo eliminado correctamente</div>
+{% endif %}
+
 <p><strong><h2>Lista de amigos</h2></strong></p>
 {% if friends %}
 
