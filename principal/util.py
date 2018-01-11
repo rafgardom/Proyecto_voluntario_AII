@@ -5,10 +5,12 @@ from datetime import datetime
 
 def populate_equipos_futbol():
     futbol = Deporte.objects.filter(name = "Futbol")
+    futbol_url = "https://as.com/futbol/" + "|" + "http://www.marca.com/futbol.html?intcmp=MENUPROD&s_kw=futbol" + "|" + \
+                 "http://www.estadiodeportivo.com/noticias-futbol/"
     if not futbol:
-        futbol = Deporte.objects.create(name="Futbol")
+        futbol = Deporte.objects.create(name="Futbol", url = futbol_url)
     else:
-        futbol = Deporte.objects.get(name = "Futbol")
+        futbol = Deporte.objects.get(name = "Futbol", url = futbol_url)
 
     urls = ["https://resultados.as.com/resultados/futbol/primera/equipos/", "https://resultados.as.com/resultados/futbol/segunda/equipos/",
             "https://resultados.as.com/resultados/futbol/inglaterra/equipos/", "https://resultados.as.com/resultados/futbol/italia/equipos/",
@@ -23,24 +25,46 @@ def populate_equipos_futbol():
 
         teams = soup.find_all('li', attrs={'class': 'col-md-3 col-sm-4 col-xs-12 s-tcenter mod-info-equipo'})
         for team in teams:
+            notices_urls = None
             #print team.prettify()
-            name = team.find('span', attrs={'class': 'escudo'}).get_text()
+            name = team.find('span', attrs={'class': 'escudo'}).get_text().strip()
             image = "http:" + team.find('img').get("src")
-            country = team.find('span', attrs={'class': 'pais'}).get_text()
+            country = team.find('span', attrs={'class': 'pais'}).get_text().strip()
+            as_url = team.find('a', attrs={'class': "col-md-6 col-sm-6 col-xs-6 content-info-escudo"}).get("href")
+            complete_as_url = "https://resultados.as.com/" + as_url
+
+            useful_name = name.lower()
+
+            if len(useful_name.split(" ")) > 1:
+                marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.split(" ")[0].strip() + "+" \
+                                + useful_name.split(" ")[1].strip() + "&b_avanzada="
+            else:
+                marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "&b_avanzada="
+
+            notices_urls = complete_as_url + "|" + marca_url
+
+            if name == "Betis":
+                notices_urls += "|" + "http://www.estadiodeportivo.com/betis/"
+
+            elif name =="Sevilla":
+                notices_urls += "|" + "http://www.estadiodeportivo.com/sevilla/"
 
             loaded_team = Equipo.objects.filter(name = name)
             if loaded_team:
-                loaded_team.update(name = name, image = image, country = country, sport = futbol)
+                loaded_team.update(name = name, image = image, country = country, sport = futbol, url = notices_urls)
             else:
-                Equipo.objects.create(name=name, image = image, country = country, sport=futbol)
+                Equipo.objects.create(name=name, image = image, country = country, sport=futbol, url = notices_urls)
             #print name, image, country
 
+
 def populate_equipos_f1():
+    f1_url = "https://as.com/motor/formula_1.html?omnil=src-sab|http://www.marca.com/motor/formula1.html?intcmp=MENUPROD&s_kw=formula-1" \
+             "|http://www.estadiodeportivo.com/motor/automovilismo/"
     f1 = Deporte.objects.filter(name="Formula 1")
     if not f1:
-        f1 = Deporte.objects.create(name="Formula 1")
+        f1 = Deporte.objects.create(name="Formula 1", url=f1_url)
     else:
-        f1 = Deporte.objects.get(name="Formula 1")
+        f1 = Deporte.objects.get(name="Formula 1", url=f1_url)
 
     urls = ["http://www.marca.com/deporte/motor/formula1/escuderias/?intcmp=MENUMIGA&s_kw=escuderias-y-pilotos"]
 
@@ -53,10 +77,13 @@ def populate_equipos_f1():
         riders = soup.find_all('li', attrs={'class': 'piloto col-md-6 col-sm-6 col-xs-12'})
         for rider in riders:
             name = rider.find('a').get("title")
+            marca_url = rider.find('a').get("href")
             raw_images = rider.find_all("img")
             image = raw_images[0].get("src")
             country = raw_images[1].get("alt")
             #print name, image, country
+
+            print marca_url
 
             loaded_team = Equipo.objects.filter(name=name)
             if loaded_team:
@@ -67,11 +94,13 @@ def populate_equipos_f1():
 
 
 def populate_equipos_motogp():
+    url_moto = "https://as.com/tag/moto_gp/a/?omnil=src-sab|http://www.marca.com/motor/motogp.html?intcmp=MENUPROD&s_kw=moto-gp|" \
+               "http://www.estadiodeportivo.com/motor/motociclismo/"
     moto_gp = Deporte.objects.filter(name="Moto GP")
     if not moto_gp:
-        moto_gp = Deporte.objects.create(name="Moto GP")
+        moto_gp = Deporte.objects.create(name="Moto GP", url =url_moto)
     else:
-        moto_gp = Deporte.objects.get(name="Moto GP")
+        moto_gp = Deporte.objects.get(name="Moto GP", url =url_moto)
 
     urls = ["https://resultados.as.com/resultados/motor/motogp/2017/integrantes/"]
 
@@ -103,11 +132,13 @@ def populate_equipos_motogp():
 
 
 def populate_equipos_baloncesto():
+    url_baloncesto = "https://as.com/baloncesto/|http://www.marca.com/baloncesto.html?intcmp=MENUPROD&s_kw=baloncesto|" \
+                     "http://www.estadiodeportivo.com/noticias-baloncesto/"
     baloncesto = Deporte.objects.filter(name="Baloncesto")
     if not baloncesto:
-        baloncesto = Deporte.objects.create(name="Baloncesto")
+        baloncesto = Deporte.objects.create(name="Baloncesto", url=url_baloncesto)
     else:
-        baloncesto = Deporte.objects.get(name="Baloncesto")
+        baloncesto = Deporte.objects.get(name="Baloncesto",url=url_baloncesto)
 
     urls = ["http://www.marca.com/baloncesto/acb/equipos.html?intcmp=MENUMIGA&s_kw=equipos-y-jugadores",
             "http://www.marca.com/baloncesto/nba/equipos.html"]
@@ -137,6 +168,8 @@ def populate_equipos_baloncesto():
         cont += 1
 
 def populate_tenis():
+    url_tenis="https://as.com/tenis/|http://www.marca.com/tenis.html?intcmp=MENUPROD&s_kw=tenis|" \
+              "http://www.estadiodeportivo.com/noticias-tenis/"
     tenis = Deporte.objects.filter(name="Tenis")
     if not tenis:
         tenis = Deporte.objects.create(name="Tenis")

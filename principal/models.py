@@ -35,6 +35,7 @@ class Equipo(models.Model):
     name = models.CharField(max_length= 100, unique = True)
     image = models.TextField()
     country = models.CharField(max_length= 100)
+    url = models.TextField()
 
     #Relationships
     sport = models.ForeignKey("Deporte", on_delete=models.CASCADE)
@@ -44,6 +45,7 @@ class Equipo(models.Model):
 
 class Deporte(models.Model):
     name = models.CharField(max_length= 100, unique=True)
+    url = models.TextField()
 
     def __unicode__(self):
         return self.name
