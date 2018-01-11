@@ -83,13 +83,13 @@ def populate_equipos_f1():
             country = raw_images[1].get("alt")
             #print name, image, country
 
-            print marca_url
+            complete_url = marca_url
 
             loaded_team = Equipo.objects.filter(name=name)
             if loaded_team:
-                loaded_team.update(name = name, image = image, country = country, sport = f1)
+                loaded_team.update(name = name, image = image, country = country, sport = f1, url = complete_url)
             else:
-                Equipo.objects.create(name=name, image=image, country=country, sport=f1)
+                Equipo.objects.create(name=name, image=image, country=country, sport=f1, url = complete_url)
 
 
 
@@ -118,17 +118,29 @@ def populate_equipos_motogp():
                 request2 = urllib2.Request("http:" + name.get("href"))
                 request2.add_header('User-Agent',
                                    'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+                as_url = "http:" + name.get("href")
                 page2 = urllib2.urlopen(request2).read()
                 soup2 = BeautifulSoup(page2, 'html.parser')
                 image = "http:" + soup2.find('img', attrs={'class': 'img-max-size'}).get("src")
                 name = name.get_text()
                 country = rider.find('img', attrs={'class': 'pais'}).get("alt")
                 #print name, country, image
+
+                useful_name = name.lower()
+
+                if len(useful_name.split(" ")) > 1:
+                    marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.split(" ")[
+                        0].strip() + "+" \
+                                + useful_name.split(" ")[1].strip() + "&b_avanzada="
+                else:
+                    marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "&b_avanzada="
+
+                complete_url = as_url.strip() + "|" + marca_url.strip()
                 loaded_team = Equipo.objects.filter(name=name)
                 if loaded_team:
-                    loaded_team.update(name=name, image=image, country=country, sport=moto_gp)
+                    loaded_team.update(name=name, image=image, country=country, sport=moto_gp, url=complete_url)
                 else:
-                    Equipo.objects.create(name=name, image=image, country=country, sport=moto_gp)
+                    Equipo.objects.create(name=name, image=image, country=country, sport=moto_gp, url=complete_url)
 
 
 def populate_equipos_baloncesto():
@@ -155,15 +167,32 @@ def populate_equipos_baloncesto():
             if(cont < 1):
                 country = "Spain"
                 name = team.find('h2', attrs={'class': 'cintillo'}).get_text()
+                useful_name = name.lower()
+                if len(useful_name.split(" ")) > 1:
+                    marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.split(" ")[
+                        0].strip() + "+" \
+                                + useful_name.split(" ")[1].strip() + "&b_avanzada="
+                else:
+                    marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "&b_avanzada="
+
             else:
                 country = "EE.UU."
                 name = team.find('h2').find("a").get_text()
-            #print name, image, country
+                useful_name = name.lower()
+                if len(useful_name.split(" ")) > 1:
+                    marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.split(" ")[
+                        0].strip() + "+" \
+                                + useful_name.split(" ")[1].strip() + "&b_avanzada="
+                else:
+                    marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "&b_avanzada="
+
+            complete_url = marca_url
+
             loaded_team = Equipo.objects.filter(name=name)
             if loaded_team:
-                loaded_team.update(name=name, image=image, country=country, sport=baloncesto)
+                loaded_team.update(name=name, image=image, country=country, sport=baloncesto, url=complete_url)
             else:
-                Equipo.objects.create(name=name, image=image, country=country, sport=baloncesto)
+                Equipo.objects.create(name=name, image=image, country=country, sport=baloncesto, url=complete_url)
 
         cont += 1
 
@@ -185,8 +214,9 @@ def populate_tenis():
         page = urllib2.urlopen(request).read()
         soup = BeautifulSoup(page, 'html.parser')
         tennis_players = soup.find_all('tr', attrs={'class': 'row-table-datos'})
-        for tp in tennis_players:
 
+        for tp in tennis_players:
+            complete_url = ""
             name = tp.find('span', attrs={'class': 'player-nom'})
 
             if name != None:
@@ -202,15 +232,44 @@ def populate_tenis():
                     data = soup2.find('section', attrs={'class': 'ficha-jug cf'})
                     country = data.find_all("dd")[1].find("strong").get_text()
                     image = "http:" + soup2.find('img', attrs={'class': 's-left ficha-jug-foto'}).get("src")
+                    if data.find('div', attrs={'class': 'itm-body s-left'}):
+                        as_url = "http:" + data.find('div', attrs={'class': 'itm-body s-left'}).find("a").get("href")
+                    else:
+                        as_url =""
+
+                    useful_name = name.lower()
+                    if len(useful_name.split(" ")) > 1:
+                        marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.split(" ")[
+                            0].strip() + "+" \
+                                    + useful_name.split(" ")[1].strip() + "&b_avanzada="
+                    else:
+                        marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "&b_avanzada="
+
+                    if as_url =="":
+                        complete_url += marca_url
+                    else:
+                        complete_url += as_url + "|" + marca_url
+
                 else:
                     country = tp.find('span', attrs={'class': 'pais'}).get_text()
                     image = "http:" + tp.find('img', attrs={'class': 'ico-bandera'}).get("src")
+
+                    useful_name = name.lower()
+                    if len(useful_name.split(" ")) > 1:
+                        marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.split(" ")[
+                            0].strip() + "+" \
+                                    + useful_name.split(" ")[1].strip() + "&b_avanzada="
+                    else:
+                        marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "&b_avanzada="
+
+                    complete_url += marca_url
+
                 #print name, country, image
                 loaded_team = Equipo.objects.filter(name=name)
                 if loaded_team:
-                    loaded_team.update(name=name, image=image, country=country, sport=tenis)
+                    loaded_team.update(name=name, image=image, country=country, sport=tenis, url=complete_url)
                 else:
-                    Equipo.objects.create(name=name, image=image, country=country, sport=tenis)
+                    Equipo.objects.create(name=name, image=image, country=country, sport=tenis, url=complete_url)
 
                 
 def noticias_futbol():
