@@ -25,11 +25,14 @@ class Noticia(models.Model):
     moment = models.DateTimeField(null=True,blank=True)
     url = models.TextField()
 
+    #Relationships
+    team = models.ForeignKey("Equipo", on_delete=models.CASCADE)
+
     def __unicode__(self):
         return self.url
 
 class Equipo(models.Model):
-    name = models.CharField(max_length= 100)
+    name = models.CharField(max_length= 100, unique = True)
     image = models.TextField()
     country = models.CharField(max_length= 100)
 

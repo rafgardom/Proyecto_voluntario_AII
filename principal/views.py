@@ -19,8 +19,7 @@ def main_view(request):
 
 @staff_member_required
 def populate_teams(request):
-    usuario = request.user.is_authenticated()
-    Deporte.objects.all().delete()
+    #Deporte.objects.all().delete()
 
     util.populate_equipos_futbol()
     util.populate_equipos_baloncesto()
