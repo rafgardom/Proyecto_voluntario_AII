@@ -23,7 +23,7 @@ class Noticia(models.Model):
     title = models.CharField(max_length= 100)
     body = models.TextField()
     moment = models.DateTimeField(null=True,blank=True)
-    url = models.TextField()
+    url = models.TextField(unique=True)
 
     #Relationships
     team = models.ForeignKey("Equipo", on_delete=models.CASCADE)
