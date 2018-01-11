@@ -273,6 +273,15 @@ def populate_tenis():
 
                 
 def noticias_futbol():
+    #TODO Coger la url desde la base de datos. En este caso "futbol.url" Una vez cogidas diferenciar cual es del as, de marca y de estadio deportivo
+    #TODO Estas noticias unicamente van a servir para mostrarlas en la pantalla de inicio o cuando el usuario es anonimo, por tanto estas noticias
+    #TODO no tienen ningun equipo asociado puesto que son "globales"
+    #TODO Despues por cada equipo habra que hacer scrapping para almacenar todas las noticias referentes a dichos equipos. De esta forma el usuario
+    #TODO podra acceder a sus noticias favoritas sin esperar tiempo de procesado.
+    #TODO Para evitar que el poblado de noticias tarde tanto, el primer poblado realizarlo completo pero los demas limitar a que comprueben si hay
+    #TODO noticias nuevas solo en la primera pagina. Para poblar la BBDD utilizar la misma forma que se usa en populate_deportes (actualizando la
+    #TODO entrada en la base de datos y nunca eliminando y volviendo a crear)
+
     url= "http://www.marca.com/futbol.html"
     page = urllib2.urlopen(url).read()
     soup = BeautifulSoup(page, 'html.parser')

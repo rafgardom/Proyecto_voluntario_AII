@@ -26,7 +26,7 @@ class Noticia(models.Model):
     url = models.TextField(unique=True)
 
     #Relationships
-    team = models.ForeignKey("Equipo", on_delete=models.CASCADE)
+    team = models.ForeignKey("Equipo", on_delete=models.CASCADE, blank=True, null=True)
 
     def __unicode__(self):
         return self.url
