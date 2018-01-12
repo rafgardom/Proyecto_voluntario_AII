@@ -311,11 +311,11 @@ def listing_users_search_box(request):
             user = request.user
             usuario = user.usuario
             cd = formulario.cleaned_data
-            searched_users_list = Usuario.objects.filter(user_name__contains = cd.get('user_name')).exclude(id=usuario.id)
+            friends = usuario.friends
+            searched_users_list = Usuario.objects.filter(user_name__contains = cd.get('user_name')).exclude(id=usuario.id).exclude(
+                id__in=[friend.id for friend in friends.all()])
             new_form = forms.search_user_form()
 
-            user = request.user
-            usuario = user.usuario
             friends = usuario.friends
             user_list = Usuario.objects.all().exclude(id=usuario.id).exclude(
                 id__in=[friend.id for friend in friends.all()])
