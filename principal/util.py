@@ -5,12 +5,10 @@ from datetime import datetime
 
 def populate_equipos_futbol():
     futbol = Deporte.objects.filter(name = "Futbol")
-    futbol_url = "https://as.com/futbol/" + "|" + "http://www.marca.com/futbol.html?intcmp=MENUPROD&s_kw=futbol" + "|" + \
-                 "http://www.estadiodeportivo.com/noticias-futbol/"
     if not futbol:
-        futbol = Deporte.objects.create(name="Futbol", url = futbol_url)
+        futbol = Deporte.objects.create(name="Futbol")
     else:
-        futbol = Deporte.objects.get(name = "Futbol", url = futbol_url)
+        futbol = Deporte.objects.get(name = "Futbol")
 
     urls = ["https://resultados.as.com/resultados/futbol/primera/equipos/", "https://resultados.as.com/resultados/futbol/segunda/equipos/",
             "https://resultados.as.com/resultados/futbol/inglaterra/equipos/", "https://resultados.as.com/resultados/futbol/italia/equipos/",
@@ -26,7 +24,6 @@ def populate_equipos_futbol():
         teams = soup.find_all('li', attrs={'class': 'col-md-3 col-sm-4 col-xs-12 s-tcenter mod-info-equipo'})
         for team in teams:
             notices_urls = None
-            #print team.prettify()
             name = team.find('span', attrs={'class': 'escudo'}).get_text().strip()
             image = "http:" + team.find('img').get("src")
             country = team.find('span', attrs={'class': 'pais'}).get_text().strip()
@@ -58,13 +55,11 @@ def populate_equipos_futbol():
 
 
 def populate_equipos_f1():
-    f1_url = "https://as.com/motor/formula_1.html?omnil=src-sab|http://www.marca.com/motor/formula1.html?intcmp=MENUPROD&s_kw=formula-1" \
-             "|http://www.estadiodeportivo.com/motor/automovilismo/"
     f1 = Deporte.objects.filter(name="Formula 1")
     if not f1:
-        f1 = Deporte.objects.create(name="Formula 1", url=f1_url)
+        f1 = Deporte.objects.create(name="Formula 1")
     else:
-        f1 = Deporte.objects.get(name="Formula 1", url=f1_url)
+        f1 = Deporte.objects.get(name="Formula 1")
 
     urls = ["http://www.marca.com/deporte/motor/formula1/escuderias/?intcmp=MENUMIGA&s_kw=escuderias-y-pilotos"]
 
@@ -94,13 +89,11 @@ def populate_equipos_f1():
 
 
 def populate_equipos_motogp():
-    url_moto = "https://as.com/tag/moto_gp/a/?omnil=src-sab|http://www.marca.com/motor/motogp.html?intcmp=MENUPROD&s_kw=moto-gp|" \
-               "http://www.estadiodeportivo.com/motor/motociclismo/"
     moto_gp = Deporte.objects.filter(name="Moto GP")
     if not moto_gp:
-        moto_gp = Deporte.objects.create(name="Moto GP", url =url_moto)
+        moto_gp = Deporte.objects.create(name="Moto GP")
     else:
-        moto_gp = Deporte.objects.get(name="Moto GP", url =url_moto)
+        moto_gp = Deporte.objects.get(name="Moto GP")
 
     urls = ["https://resultados.as.com/resultados/motor/motogp/2017/integrantes/"]
 
@@ -144,13 +137,11 @@ def populate_equipos_motogp():
 
 
 def populate_equipos_baloncesto():
-    url_baloncesto = "https://as.com/baloncesto/|http://www.marca.com/baloncesto.html?intcmp=MENUPROD&s_kw=baloncesto|" \
-                     "http://www.estadiodeportivo.com/noticias-baloncesto/"
     baloncesto = Deporte.objects.filter(name="Baloncesto")
     if not baloncesto:
-        baloncesto = Deporte.objects.create(name="Baloncesto", url=url_baloncesto)
+        baloncesto = Deporte.objects.create(name="Baloncesto")
     else:
-        baloncesto = Deporte.objects.get(name="Baloncesto",url=url_baloncesto)
+        baloncesto = Deporte.objects.get(name="Baloncesto")
 
     urls = ["http://www.marca.com/baloncesto/acb/equipos.html?intcmp=MENUMIGA&s_kw=equipos-y-jugadores",
             "http://www.marca.com/baloncesto/nba/equipos.html"]
@@ -197,8 +188,6 @@ def populate_equipos_baloncesto():
         cont += 1
 
 def populate_tenis():
-    url_tenis="https://as.com/tenis/|http://www.marca.com/tenis.html?intcmp=MENUPROD&s_kw=tenis|" \
-              "http://www.estadiodeportivo.com/noticias-tenis/"
     tenis = Deporte.objects.filter(name="Tenis")
     if not tenis:
         tenis = Deporte.objects.create(name="Tenis")

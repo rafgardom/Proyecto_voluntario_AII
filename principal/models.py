@@ -45,7 +45,6 @@ class Equipo(models.Model):
 
 class Deporte(models.Model):
     name = models.CharField(max_length= 100, unique=True)
-    url = models.TextField()
 
     def __unicode__(self):
         return self.name
