@@ -4,6 +4,13 @@
 
 {% block contenido %}
 
+    {% if bad_login %}
+        <div class="alert alert-warning">
+            <strong>Ha ocurrido un error.</strong> Asegúrese que ha introducido correctamente los datos. Compruebe que ha introducido correctamente
+        las contraseñas. Si el error persiste se debe a que ya hay un usuario con ese nombre o el email introducido ya está registrado
+        </div>
+    {% endif %}
+
     <form id="formulario" method ="post" enctype="multipart/form-data" action="">{% csrf_token %}
         <table>
             {{formulario}}

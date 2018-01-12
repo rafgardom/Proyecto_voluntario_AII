@@ -78,8 +78,7 @@ def ingresar(request):
 
 def create_account(request):
     usuario = request.user.is_authenticated()
-    fail = False
-
+    result = None
     try:
         if usuario is not False:
             raise Exception('Accion no permitida')
@@ -89,6 +88,9 @@ def create_account(request):
             if formulario.is_valid():
                 try:
                     cd = formulario.cleaned_data
+                    if cd.get('password') != cd.get('repeat_password'):
+                        raise Exception('Accion no permitida')
+
                     user = User.objects.create_user(username=cd.get('user_name'),
                                                     email=cd.get('email'),
                                                     password=cd.get('password'))
@@ -99,14 +101,14 @@ def create_account(request):
                                                        address=cd.get('address'))
                     return HttpResponseRedirect('/')
                 except Exception as e:
-                    fail = True
-                    result = render_to_response('error.html',
+                    result = render_to_response('create_user.html', {'formulario': formulario, 'request': request, 'bad_login': True},
                                                 context_instance=RequestContext(request))
+            else:
+                result = render_to_response('create_user.html', {'formulario': formulario, 'request': request},
+                                            context_instance=RequestContext(request))
 
         else:
             formulario = forms.create_user()
-
-        if fail == False:
             result = render_to_response('create_user.html', {'formulario': formulario, 'request':request},
                                         context_instance=RequestContext(request))
         return result
@@ -276,7 +278,7 @@ def add_team(request, id):
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
 
-@login_required(login_url='/ingresar')
+''''@login_required(login_url='/ingresar')
 def listing_users(request):
 
     user = request.user
@@ -297,8 +299,70 @@ def listing_users(request):
     except EmptyPage:
         users = paginator.page(paginator.num_pages)
 
-    return render_to_response('add_friend.html', {'users': users, 'request': request})
+    return render_to_response('add_friend.html', {'users': users, 'request': request})'''
 
+
+@login_required(login_url='/ingresar')
+def listing_users_search_box(request):
+
+    if request.method == 'POST':
+        formulario = forms.search_user_form(request.POST)
+        if formulario.is_valid():
+            user = request.user
+            usuario = user.usuario
+            cd = formulario.cleaned_data
+            searched_users_list = Usuario.objects.filter(user_name__contains = cd.get('user_name')).exclude(id=usuario.id)
+            new_form = forms.search_user_form()
+
+            user = request.user
+            usuario = user.usuario
+            friends = usuario.friends
+            user_list = Usuario.objects.all().exclude(id=usuario.id).exclude(
+                id__in=[friend.id for friend in friends.all()])
+
+            user_list.exclude(id=usuario.id)
+            user_list.exclude(id__in=[friend.id for friend in friends.all()])
+
+            page = request.GET.get('page1', 1)
+            page2 = request.GET.get('page2', 1)
+
+            paginator = Paginator(user_list, 10)
+            paginator2 = Paginator(searched_users_list, 10)
+            try:
+                users = paginator.page(page)
+                searched_users = paginator2.page(page2)
+            except PageNotAnInteger:
+                users = paginator.page(1)
+                searched_users = paginator2.page(5)
+            except EmptyPage:
+                users = paginator.page(paginator.num_pages)
+                searched_users = paginator2.page(paginator2.num_pages)
+
+            return render_to_response('add_friend.html', {'request': request,'users': users, 'searched_users': searched_users,
+                                                          'formulario':new_form}, context_instance = RequestContext(request))
+    else:
+        formulario = forms.search_user_form()
+
+        user = request.user
+        usuario = user.usuario
+        friends = usuario.friends
+        user_list = Usuario.objects.all().exclude(id=usuario.id).exclude(id__in=[friend.id for friend in friends.all()])
+
+        user_list.exclude(id = usuario.id)
+        user_list.exclude(id__in=[friend.id for friend in friends.all()])
+
+        page = request.GET.get('page1', 1)
+
+        paginator = Paginator(user_list, 10)
+        try:
+            users = paginator.page(page)
+        except PageNotAnInteger:
+            users = paginator.page(1)
+        except EmptyPage:
+            users = paginator.page(paginator.num_pages)
+
+    return render_to_response('add_friend.html', {'request': request,'users': users,
+                                                              'formulario':formulario}, context_instance = RequestContext(request))
 @login_required(login_url='/ingresar')
 def listing_sports(request):
     usuario = request.user.is_authenticated()

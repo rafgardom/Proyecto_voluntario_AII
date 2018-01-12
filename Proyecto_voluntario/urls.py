@@ -41,7 +41,7 @@ urlpatterns = patterns('',
     url(r'^delete_team/(?P<id>\d+)/$', 'principal.views.delete_team', name="delete_team"),
 
     #List users
-    url(r'^list_users/$','principal.views.listing_users'),
+    url(r'^list_users/$','principal.views.listing_users_search_box'),
 
     #List teams
     url(r'^list_teams/$','principal.views.listing_teams'),
