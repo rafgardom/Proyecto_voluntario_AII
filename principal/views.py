@@ -314,15 +314,40 @@ def listing_sports(request):
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
 
+@login_required(login_url='/ingresar')
+def listing_teams_by_country(request, id):
+    usuario = request.user.is_authenticated()
+    try:
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
+
+        sport = Deporte.objects.get(id=id)
+        user = request.user
+        usuario = user.usuario
+
+        countries = Equipo.objects.values_list('country').filter(sport=sport).exclude(
+            id__in=[team.id for team in usuario.favourite_teams.all()])
+        countries = list(set(countries))
+
+        return render_to_response('select_sport.html', {'countries': countries, 'request': request, 'sport_id': id})
+
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
 
 @login_required(login_url='/ingresar')
-def selected_sport(request, id):
+def selected_sport(request,country, id):
     try:
         sport = Deporte.objects.get(id = id)
         user = request.user
         usuario = user.usuario
 
-        teams_list = sport.equipo_set.exclude(id__in=[team.id for team in usuario.favourite_teams.all()])
+        teams_list = sport.equipo_set.exclude(id__in=[team.id for team in usuario.favourite_teams.all()]).filter(country = country)
+        countries = Equipo.objects.values_list('country').filter(sport = sport).exclude(id__in=[team.id for team in usuario.favourite_teams.all()])
+        countries = list(set(countries))
+
+        print countries
         page = request.GET.get('page', 1)
 
         paginator = Paginator(teams_list, 10)

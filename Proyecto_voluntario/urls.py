@@ -50,7 +50,10 @@ urlpatterns = patterns('',
     url(r'^select_sports/$','principal.views.listing_sports'),
 
     #Select sport
-    url(r'^selected_sport/(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport"),
+    url(r'^selected_sport/(?P<id>\d+)/$', 'principal.views.listing_teams_by_country', name="selected_sport"),
+
+    #Select sport by country
+    url(r'^selected_sport_country/(?P<country>\w+)(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport_country"),
 
     #Add friend
     url(r'^add_friend/(?P<id>\d+)/$', 'principal.views.add_friend', name="add_friend"),

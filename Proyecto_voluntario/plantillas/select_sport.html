@@ -3,29 +3,58 @@
 {% block titulo_apartado %} Deportes {% endblock %}
 
 {% block contenido %}
+    {% if sports %}
+        <p><strong><h2>Lista de deportes</h2></strong></p>
+    {% endif %}
+    {% if countries %}
+        <p><strong><h2>Lista de países</h2></strong></p>
+    {% endif %}
 
-    <p><strong><h2>Lista de deportes</h2></strong></p>
+    {% if sports %}
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sport in sports %}
+              <tr>
+                <td>{{ sport.name }}</td>
+                <td>
+                     <a href ={% url selected_sport sport.id  %} class='btn btn-primary'>
+                                Seleccionar deporte
+                     </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    {% endif %}
 
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for sport in sports %}
-          <tr>
-            <td>{{ sport.name }}</td>
-            <td>
-                 <a href ={% url selected_sport sport.id  %} class='btn btn-primary'>
-                            Seleccionar deporte
-                 </a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% if countries %}
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>País</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for country in countries %}
+              <tr>
+                <td>{{ country.0 }}</td>
+                <td>
+                    <a href ={% url selected_sport_country country.0  sport_id  %} class='btn btn-primary'>
+                                Seleccionar país
+                     </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    {% endif %}
 
 {% endblock %}
 
