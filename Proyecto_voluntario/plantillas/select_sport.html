@@ -46,9 +46,28 @@
               <tr>
                 <td>{{ country.0 }}</td>
                 <td>
-                    <a href ={% url selected_sport_country country.0  sport_id  %} class='btn btn-primary'>
-                                Seleccionar país
-                     </a>
+                    {% if country.0 == "EE.UU." %}
+                        <a href ={% url selected_sport_country1 country.0  sport_id  %} class='btn btn-primary'>
+                                    Seleccionar país
+                         </a>
+                    {% endif %}
+                    {% if "(" in country.0 %}
+                        <a href ={% url selected_sport_country2 country.0  sport_id  %} class='btn btn-primary'>
+                                    Seleccionar país
+                         </a>
+                    {% endif %}
+
+                    {% if " " in country.0 %}
+                        <a href ={% url selected_sport_country3 country.0  sport_id  %} class='btn btn-primary'>
+                                    Seleccionar país
+                         </a>
+                    {% endif %}
+
+                    {% if country.0 != "EE.UU." and "(" not in country.0 and " " not in country.0%}
+                        <a href ={% url selected_sport_country4 country.0  sport_id  %} class='btn btn-primary'>
+                                    Seleccionar país
+                         </a>
+                    {% endif %}
                 </td>
               </tr>
             {% endfor %}

@@ -52,8 +52,17 @@ urlpatterns = patterns('',
     #Select sport
     url(r'^selected_sport/(?P<id>\d+)/$', 'principal.views.listing_teams_by_country', name="selected_sport"),
 
-    #Select sport by country
-    url(r'^selected_sport_country/(?P<country>\w+)(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport_country"),
+    #Select sport by country1
+    url(r'^selected_sport_country/(?P<country>\w+?\W+?\w+?\W+)(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport_country1"),
+
+    #Select sport by country2
+    url(r'^selected_sport_country/(?P<country>\W+\w+\W+)(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport_country2"),
+
+    #Select sport by country3
+    url(r'^selected_sport_country/(?P<country>\w+\W+\w+)(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport_country3"),
+
+    #Select sport by country4
+    url(r'^selected_sport_country/(?P<country>\w+)(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport_country4"),
 
     #Add friend
     url(r'^add_friend/(?P<id>\d+)/$', 'principal.views.add_friend', name="add_friend"),
