@@ -19,7 +19,6 @@ def main_view(request):
 
 @staff_member_required
 def populate_teams(request):
-
     util.populate_equipos_futbol()
     util.populate_equipos_baloncesto()
     util.populate_equipos_f1()
@@ -30,10 +29,14 @@ def populate_teams(request):
 
 @staff_member_required
 def populate_noticias(request):
-    usuario = request.user.is_authenticated()
-    Noticia.objects.all().delete()
+    #Noticia.objects.all().delete()
 
-    util.noticias_futbol_as()
+    #util.noticias_futbol_as()
+    util.noticias_futbol_marca()
+    #util.noticias_f1()
+    #util.noticias_baloncesto()
+    #util.noticias_moto()
+    #util.noticias_tenis()
 
     return render_to_response('main.html', {'db_status': "Noticias generadas", 'request':request})
 
