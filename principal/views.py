@@ -32,7 +32,8 @@ def populate_noticias(request):
     #Noticia.objects.all().delete()
 
     #util.noticias_futbol_as()
-    util.noticias_futbol_marca()
+    #util.noticias_futbol_marca()
+    util.noticias_ED()
     #util.noticias_f1()
     #util.noticias_baloncesto()
     #util.noticias_moto()

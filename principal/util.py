@@ -376,6 +376,43 @@ def noticias_futbol_as():
         if is_new == False:
             break
 
+def noticias_ED():
+    futbol = Deporte.objects.get(name="Futbol")
+    equipos = Equipo.objects.filter(sport=futbol)
+    for equipo in equipos:
+        if (equipo.name == "Sevilla" or equipo.name == "Betis"):
+            url_futbol = equipo.url
+            url = remove_accents(url_futbol.split("|")[2])
+            if requests.get(url).status_code == 404:
+                continue
+            request2 = urllib2.Request(url)
+            request2.add_header('User-Agent',
+                       'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+            page2 = urllib2.urlopen(request2).read()
+            soup2 = BeautifulSoup(page2, 'html.parser')
+            for noticias in soup2.find_all(attrs={'itemprop':'headline'}):
+                title = noticias.find('a').get_text()
+                urlnoticia = "http://estadiodeportivo.com"+noticias.find('a').get('href')
+                request3 = urllib2.Request(urlnoticia)
+                request3.add_header('User-Agent',
+                           'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+                page3 = urllib2.urlopen(request3).read()
+                soup3 = BeautifulSoup(page3, 'html.parser')
+                stripdate = soup3.find('span',attrs={'class':'fecha_hora'})
+                stripdate =  stripdate.get_text().replace('|','').replace(' ','').replace('.','/')
+                d = stripdate[:10]+ ' ' + stripdate[10:]
+                moment = try_parsing_date(d)
+                body=[]
+                row = soup3.find('span',attrs={'itemprop':'articleBody'})
+                if row != None:
+                    for cuerpo in row.find_all('p'):
+                        body.append(cuerpo.get_text())
+                loaded_noticia = Noticia.objects.filter(url=url)           
+                if loaded_noticia:
+                    pass
+                else:
+                    Noticia.objects.create(title=title,body=body, moment=moment, url=urlnoticia,team=equipo)
+
 def noticias_tenis():
     tenis = Deporte.objects.get(name="Tenis")
     equipos = Equipo.objects.filter(sport=tenis)
