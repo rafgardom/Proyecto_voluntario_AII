@@ -33,7 +33,7 @@ def populate_noticias(request):
     usuario = request.user.is_authenticated()
     Noticia.objects.all().delete()
 
-    util.noticias_futbol()
+    util.noticias_futbol_as()
 
     return render_to_response('main.html', {'db_status': "Noticias generadas", 'request':request})
 

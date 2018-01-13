@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup
 import urllib2, re
+import requests
 from models import Equipo, Deporte, Noticia
 from datetime import datetime
+import unicodedata
 
 def populate_equipos_futbol():
     futbol = Deporte.objects.filter(name = "Futbol")
@@ -25,18 +28,19 @@ def populate_equipos_futbol():
         for team in teams:
             notices_urls = None
             name = team.find('span', attrs={'class': 'escudo'}).get_text().strip()
+            if name == "Deportivo":
+                name = u"Deportivo Coruña"
             image = "http:" + team.find('img').get("src")
             country = team.find('span', attrs={'class': 'pais'}).get_text().strip()
             as_url = team.find('a', attrs={'class': "col-md-6 col-sm-6 col-xs-6 content-info-escudo"}).get("href")
             complete_as_url = "https://resultados.as.com/" + as_url
 
             useful_name = name.lower()
-
             if len(useful_name.split(" ")) > 1:
                 marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.split(" ")[0].strip() + "+" \
-                                + useful_name.split(" ")[1].strip() + "&b_avanzada="
+                                + useful_name.split(" ")[1].strip() + "+futbol&b_avanzada="
             else:
-                marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "&b_avanzada="
+                marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "+futbol&b_avanzada="
 
             notices_urls = complete_as_url + "|" + marca_url
 
@@ -162,9 +166,9 @@ def populate_equipos_baloncesto():
                 if len(useful_name.split(" ")) > 1:
                     marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.split(" ")[
                         0].strip() + "+" \
-                                + useful_name.split(" ")[1].strip() + "&b_avanzada="
+                                + useful_name.split(" ")[1].strip() + "+baloncesto&b_avanzada="
                 else:
-                    marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "&b_avanzada="
+                    marca_url = "http://cgi.marca.com/buscador/archivo_marca.html?q=" + useful_name.strip() + "+baloncesto&b_avanzada="
 
             else:
                 country = "EE.UU."
@@ -261,7 +265,7 @@ def populate_tenis():
                     Equipo.objects.create(name=name, image=image, country=country, sport=tenis, url=complete_url)
 
                 
-def noticias_futbol():
+def noticias_futbol_marca():
     #TODO Coger la url desde la base de datos. En este caso "futbol.url" Una vez cogidas diferenciar cual es del as, de marca y de estadio deportivo
     #TODO Estas noticias unicamente van a servir para mostrarlas en la pantalla de inicio o cuando el usuario es anonimo, por tanto estas noticias
     #TODO no tienen ningun equipo asociado puesto que son "globales"
@@ -271,122 +275,243 @@ def noticias_futbol():
     #TODO noticias nuevas solo en la primera pagina. Para poblar la BBDD utilizar la misma forma que se usa en populate_deportes (actualizando la
     #TODO entrada en la base de datos y nunca eliminando y volviendo a crear)
 
-    url= "http://www.marca.com/futbol.html"
-    page = urllib2.urlopen(url).read()
-    soup = BeautifulSoup(page, 'html.parser')
-    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
-        title = noticias.find('h3')
-        if title != None:
-            url2 = title.find('a').get('href')
-            #print url2
+    futbol = Deporte.objects.get(name="Futbol")
+    equipos = Equipo.objects.filter(sport=futbol)
+    for equipo in equipos:
+        url_futbol = equipo.url
+        url = remove_accents(url_futbol.split("|")[1])
+        if requests.get(url).status_code == 404:
+            continue
+        request2 = urllib2.Request(url)
+        request2.add_header('User-Agent',
+                       'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+        page2 = urllib2.urlopen(request2).read()
+        soup2 = BeautifulSoup(page2, 'html.parser')
+        for noticias in soup2.find_all('div',attrs={'class':'texto-foto'}):
+            #print noticias
+            title = noticias.find('h4')
             #print title.get_text()
-            page2 = urllib2.urlopen(url2).read()
-            soup2 = BeautifulSoup(page2, 'html.parser')
-            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
-            if stripdate != None:
-                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                #print moment
-                if moment == None:
-                    moment = datetime.now()
-            for row in soup2.find_all('div',attrs={'class':'row'}):
-                for cuerpo in row.find_all('p'):
-                    body = cuerpo.get_text()
+            if title != None:
+                url3 = title.find('a').get('href')
+                if not "http" in url3:
+                    continue
+                page3 = urllib2.urlopen(url3).read()
+                soup3 = BeautifulSoup(page3, 'html.parser')
+                stripdate = soup3.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+                if stripdate != None:
+                    moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                    #print moment
+                body=[]
+                for row in soup3.find_all('div',attrs={'itemprop':'articleBody'}):
+                    for cuerpo in row.find_all('p'):
+                        body.append(cuerpo.get_text())
                     #print body
-                    Noticia.objects.create(title=title.get_text(),body=body, moment=moment, url=url2)
-        #link = noticias.find_all('a',title = True)
-        #print link
+            loaded_noticia = Noticia.objects.filter(url=url)           
+            if loaded_noticia:
+                pass
+            else:
+                Noticia.objects.create(title=title.get_text(),body=body, moment=moment, url=url3,team=equipo)
+
+def noticias_futbol_as():
+    futbol = Deporte.objects.get(name="Futbol")
+    equipos = Equipo.objects.filter(sport=futbol)
+    for equipo in equipos:
+        url_futbol = equipo.url
+        url = remove_accents(url_futbol.split("|")[0])
+        if requests.get(url).status_code == 404:
+            continue
+        request2 = urllib2.Request(url)
+        request2.add_header('User-Agent',
+                       'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+        page2 = urllib2.urlopen(request2).read()
+        soup2 = BeautifulSoup(page2, 'html.parser')
+        url_noticias = soup2.find('div',attrs={'class':'s-tright'})
+        url2 = "http:"+url_noticias.find('a').get('href')
+        request3 = urllib2.Request(url2)
+        request2.add_header('User-Agent',
+                   'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+        page3 = urllib2.urlopen(request3).read()
+        soup3 = BeautifulSoup(page3, 'html.parser')
+        for noticias in soup3.find_all('div', attrs={"class":"pntc-content"}):
+            title = noticias.find('h2')
+            url3 = noticias.find('a').get('href')
+            stripdate = noticias.find('span',attrs={'class':'fecha'})
+            if stripdate != None:
+                moment = try_parsing_date(stripdate.get_text())
+            if not "http" in url3:
+                continue
+            page4 = urllib2.urlopen(url3).read()
+            soup4 = BeautifulSoup(page4, 'html.parser')
+            body=[]
+            row = soup4.find('div',attrs={'itemprop':'articleBody'})
+            if row != None:
+                for cuerpo in row.find_all('p'):
+                    body.append(cuerpo.get_text())
+            loaded_noticia = Noticia.objects.filter(url=url)           
+            if loaded_noticia:
+                pass
+            else:
+                Noticia.objects.create(title=title.get_text(),body=body, moment=moment, url=url3,team=equipo)
 
 def noticias_tenis():
-    url= "http://www.marca.com/tenis.html?intcmp=MENUPROD&s_kw=tenis"
-    page = urllib2.urlopen(url).read()
-    soup = BeautifulSoup(page, 'html.parser')
-    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
-        title = noticias.find('h3')
-        if title != None:
-            url2 = title.find('a').get('href')
-            #print url2
+    tenis = Deporte.objects.get(name="Tenis")
+    equipos = Equipo.objects.filter(sport=tenis)
+    for equipo in equipos:
+        url = remove_accents(equipo.url)
+        if requests.get(url).status_code == 404:
+            continue
+        request2 = urllib2.Request(url)
+        request2.add_header('User-Agent',
+                       'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+        page2 = urllib2.urlopen(request2).read()
+        soup2 = BeautifulSoup(page2, 'html.parser')
+        for noticias in soup2.find_all('div',attrs={'class':'texto-foto'}):
+            #print noticias
+            title = noticias.find('h4')
             #print title.get_text()
-            page2 = urllib2.urlopen(url2).read()
-            soup2 = BeautifulSoup(page2, 'html.parser')
-            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
-            if stripdate != None:
-                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                #print moment
-            for row in soup2.find_all('div',attrs={'class':'row'}):
-                for cuerpo in row.find_all('p'):
-                    body = cuerpo.get_text()
+            if title != None:
+                url3 = title.find('a').get('href')
+                if not "http" in url3:
+                    continue   
+                #print url3
+                page3 = urllib2.urlopen(url3).read()
+                soup3 = BeautifulSoup(page3, 'html.parser')
+                stripdate = soup3.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+                if stripdate != None:
+                    moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                    #print moment
+             
+                body=[]
+                for row in soup3.find_all('div',attrs={'itemprop':'articleBody'}):
+                    for cuerpo in row.find_all('p'):
+                        body.append(cuerpo.get_text())
                     #print body
-                    Noticia.objects.create(title=title,body=body, moment=moment, url=url2)
+            loaded_noticia = Noticia.objects.filter(url=url)           
+            if loaded_noticia:
+                pass
+            else:
+                Noticia.objects.create(title=title.get_text(),body=body, moment=moment, url=url3,team=equipo)
 
 def noticias_baloncesto():
-    url= "http://www.marca.com/baloncesto.html?intcmp=MENUPROD&s_kw=baloncesto"
-    page = urllib2.urlopen(url).read()
-    soup = BeautifulSoup(page, 'html.parser')
-    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
-        title = noticias.find('h3')
-        if title != None:
-            url2 = title.find('a').get('href')
-            #print url2
+    baloncesto = Deporte.objects.get(name="Baloncesto")
+    equipos = Equipo.objects.filter(sport=baloncesto)
+    for equipo in equipos:
+
+        url = remove_accents(equipo.url)
+        if requests.get(url).status_code == 404:
+            continue
+        request2 = urllib2.Request(url)
+        request2.add_header('User-Agent',
+                       'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+        page2 = urllib2.urlopen(request2).read()
+        soup2 = BeautifulSoup(page2, 'html.parser')
+        for noticias in soup2.find_all('div',attrs={'class':'texto-foto'}):
+            #print noticias
+            title = noticias.find('h4')
             #print title.get_text()
-            page2 = urllib2.urlopen(url2).read()
-            soup2 = BeautifulSoup(page2, 'html.parser')
-            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
-            if stripdate != None:
-                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                #print moment
-            for row in soup2.find_all('div',attrs={'class':'row'}):
-                for cuerpo in row.find_all('p'):
-                    body = cuerpo.get_text()
+            if title != None:
+                url3 = title.find('a').get('href')
+                if not "http" in url3:
+                    continue    
+                #print url3
+                page3 = urllib2.urlopen(url3).read()
+                soup3 = BeautifulSoup(page3, 'html.parser')
+                stripdate = soup3.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+                if stripdate != None:
+                    moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                    #print moment
+            
+                body=[]
+                for row in soup3.find_all('div',attrs={'itemprop':'articleBody'}):
+                    for cuerpo in row.find_all('p'):
+                        body.append(cuerpo.get_text())
                     #print body
-                    Noticia.objects.create(title=title,body=body, moment=moment, url=url2)
+            loaded_noticia = Noticia.objects.filter(url=url)           
+            if loaded_noticia:
+                pass
+            else:
+                Noticia.objects.create(title=title.get_text(),body=body, moment=moment, url=url3, team=equipo)
 
 def noticias_f1():
-    url= "http://www.marca.com/motor/formula1.html?intcmp=MENUPROD&s_kw=formula-1"
-    page = urllib2.urlopen(url).read()
-    soup = BeautifulSoup(page, 'html.parser')
-    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
-        title = noticias.find('h3')
-        if title != None:
-            url2 = title.find('a').get('href')
-            #print url2
-            #print title.get_text()
-            page2 = urllib2.urlopen(url2).read()
-            soup2 = BeautifulSoup(page2, 'html.parser')
-            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
-            if stripdate != None:
-                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                #print moment
-            for row in soup2.find_all('div',attrs={'class':'row'}):
-                for cuerpo in row.find_all('p'):
-                    body = cuerpo.get_text()
-                    #print body
-                    Noticia.objects.create(title=title,body=body, moment=moment, url=url2)
+    f1 = Deporte.objects.get(name="Formula 1")
+    f1_equipos = Equipo.objects.filter(sport=f1)
+    for equipo in f1_equipos:
+        url = remove_accents(equipo.url)
+        if requests.get(url).status_code == 404:
+            continue    
+        page = urllib2.urlopen(url).read()
+        soup = BeautifulSoup(page, 'html.parser')
+        for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
+            title = noticias.find('h3')
+            if title != None:
+                url2 = title.find('a').get('href')
+                if not "http" in url2:
+                    continue   
+                #print url2
+                #print title.get_text()
+                page2 = urllib2.urlopen(url2).read()
+                soup2 = BeautifulSoup(page2, 'html.parser')
+                stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+                if stripdate != None:
+                    moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                    #print moment
+                for row in soup2.find_all('div',attrs={'class':'row'}):
+                    body = []
+                    for cuerpo in row.find_all('p'):
+                        body.append(cuerpo.get_text())
+                        #print body
+            loaded_noticia = Noticia.objects.filter(url=url)           
+            if loaded_noticia:
+                pass
+            else:
+                Noticia.objects.create(title=title.get_text(),body=body, moment=moment, url=url2, team=equipo)
 
 def noticias_moto():
-    url= "http://www.marca.com/motor/motogp.html?intcmp=MENUPROD&s_kw=moto-gp"
-    page = urllib2.urlopen(url).read()
-    soup = BeautifulSoup(page, 'html.parser')
-    for noticias in soup.find_all('li',attrs={'class':['content-item','flex__item']}):
-        title = noticias.find('h3')
-        if title != None:
-            url2 = title.find('a').get('href')
-            #print url2
+    mgp = Deporte.objects.get(name="Moto GP")
+    equipos = Equipo.objects.filter(sport=mgp)
+    for equipo in equipos:
+        url_mgp = equipo.url
+        url = remove_accents(url_mgp.split("|")[1])
+        if requests.get(url).status_code == 404:
+            continue
+        request2 = urllib2.Request(url)
+        request2.add_header('User-Agent',
+                       'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+        page2 = urllib2.urlopen(request2).read()
+        soup2 = BeautifulSoup(page2, 'html.parser')
+        for noticias in soup2.find_all('div',attrs={'class':'texto-foto'}):
+            #print noticias
+            title = noticias.find('h4')
             #print title.get_text()
-            page2 = urllib2.urlopen(url2).read()
-            soup2 = BeautifulSoup(page2, 'html.parser')
-            stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
-            if stripdate != None:
-                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                #print moment
-            for row in soup2.find_all('div',attrs={'class':'row'}):
-                for cuerpo in row.find_all('p'):
-                    body = cuerpo.get_text()
+            if title != None:
+                url3 = title.find('a').get('href')
+                if not "http" in url3:
+                    continue   
+                #print url3
+                page3 = urllib2.urlopen(url3).read()
+                soup3 = BeautifulSoup(page3, 'html.parser')
+                stripdate = soup3.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']}) 
+                if stripdate != None:
+                    moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
+                    #print moment
+                body=[]
+                for row in soup3.find_all('div',attrs={'itemprop':'articleBody'}):
+                    for cuerpo in row.find_all('p'):
+                        body.append(cuerpo.get_text())
                     #print body
-                    Noticia.objects.create(title=title,body=body, moment=moment, url=url2)
-                    
+            loaded_noticia = Noticia.objects.filter(url=url)           
+            if loaded_noticia:
+                pass
+            else:
+                Noticia.objects.create(title=title.get_text(),body=body, moment=moment, url=url3, team=equipo)
+       
 def try_parsing_date(text):
     for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y','%d-%m-%Y','%d/%m/%Y %H:%M','%d-%m-%Y %H:%M'):
         try:
             return datetime.strptime(text, fmt)
         except ValueError:
             pass
+        
+def remove_accents(input_str):
+    nkfd_form = unicodedata.normalize('NFKD', unicode(input_str))
+    return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
