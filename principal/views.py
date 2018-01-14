@@ -16,8 +16,21 @@ import re
 
 
 def main_view(request):
-    usuario = request.user.is_authenticated()
-    return render_to_response('home.html', {'request':request})
+    news_list = Noticia.objects.all().order_by("-moment")[:300]
+    news_list = list(news_list.all())
+    shuffle(news_list)
+
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(news_list, 10)
+    try:
+        news = paginator.page(page)
+    except PageNotAnInteger:
+        news = paginator.page(1)
+    except EmptyPage:
+        news = paginator.page(paginator.num_pages)
+
+    return render_to_response('home.html', {'request':request, 'news':news})
 
 @staff_member_required
 def populate_teams(request):
