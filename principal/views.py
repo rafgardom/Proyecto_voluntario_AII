@@ -11,6 +11,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from random import shuffle
+import re
 
 
 def main_view(request):
@@ -101,7 +103,8 @@ def create_account(request):
                                                        name=cd.get('name'),
                                                        email=cd.get('email'),
                                                        address=cd.get('address'))
-                    return HttpResponseRedirect('/')
+
+                    return render_to_response('home.html', {'good_create': True, 'request': request},context_instance=RequestContext(request))
                 except Exception as e:
                     result = render_to_response('create_user.html', {'formulario': formulario, 'request': request, 'bad_login': True},
                                                 context_instance=RequestContext(request))
@@ -342,6 +345,30 @@ def listing_users_search_box(request):
 
             return render_to_response('add_friend.html', {'request': request,'users': users, 'searched_users': searched_users,
                                                           'formulario':new_form}, context_instance = RequestContext(request))
+        else:
+            formulario = forms.search_user_form()
+            user = request.user
+            usuario = user.usuario
+            friends = usuario.friends
+            user_list = Usuario.objects.all().exclude(id=usuario.id).exclude(
+                id__in=[friend.id for friend in friends.all()])
+            user_list.exclude(id=usuario.id)
+            user_list.exclude(id__in=[friend.id for friend in friends.all()])
+
+            page = request.GET.get('page1', 1)
+
+            paginator = Paginator(user_list, 10)
+            try:
+                users = paginator.page(page)
+            except PageNotAnInteger:
+                users = paginator.page(1)
+            except EmptyPage:
+                users = paginator.page(paginator.num_pages)
+
+            return render_to_response('add_friend.html',
+                                      {'request': request, 'users': users,
+                                       'formulario': formulario}, context_instance=RequestContext(request))
+
     else:
         formulario = forms.search_user_form()
 
@@ -363,8 +390,8 @@ def listing_users_search_box(request):
         except EmptyPage:
             users = paginator.page(paginator.num_pages)
 
-    return render_to_response('add_friend.html', {'request': request,'users': users,
-                                                              'formulario':formulario}, context_instance = RequestContext(request))
+        return render_to_response('add_friend.html', {'request': request,'users': users,
+                                                                  'formulario':formulario}, context_instance = RequestContext(request))
 @login_required(login_url='/ingresar')
 def listing_sports(request):
     usuario = request.user.is_authenticated()
@@ -480,3 +507,60 @@ def listing_teams(request):
 
     return render_to_response('add_team.html', {'footballs': footballs, 'tennises': tennises, 'motogps': motogps,
                                                 'fones': fones, 'baskets': baskets, 'request': request})
+
+
+@login_required(login_url='/ingresar')
+def my_news(request):
+    user = request.user
+    usuario = user.usuario
+
+    teams = usuario.favourite_teams.all()
+    news_list = []
+    for team in teams:
+        news = Noticia.objects.filter(team = team).order_by('-moment')
+        news_list.extend(news)
+
+        news_list = list(set(news_list))
+
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(news_list, 15)
+    try:
+        news = paginator.page(page)
+    except PageNotAnInteger:
+        news = paginator.page(1)
+    except EmptyPage:
+        news = paginator.page(paginator.num_pages)
+
+    return render_to_response('my_news.html', {'request': request, 'news':news})
+
+
+@login_required(login_url='/ingresar')
+def new_view(request, id):
+    user = request.user
+    usuario = user.usuario
+    #try:
+    new = Noticia.objects.get(id = id)
+    body = str(new.body)
+    body = body.split("u'")
+    try:
+        del body[0]
+        del body[-1]
+    except:
+        pass
+
+    for i in range(len(body)):
+        body[i] = body[i][:-3].decode("unicode_escape")
+
+    for i in range(len(body)):
+        body[i] = body[i].split(", u")
+
+    body = [item for sublist in body for item in sublist]
+
+
+
+
+    return render_to_response('new_view.html', {'request': request, 'new': new, 'body': body})
+    '''except:
+        return render_to_response('error.html', {'user': usuario},
+                                  context_instance=RequestContext(request))'''

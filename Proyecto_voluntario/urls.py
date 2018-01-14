@@ -70,5 +70,9 @@ urlpatterns = patterns('',
     #Add team
     url(r'^add_team/(?P<id>\d+)/$', 'principal.views.add_team', name="add_team"),
 
+    #My news
+    url(r'^my_news/$', 'principal.views.my_news', name="my_news"),
 
+    #Watch new
+    url(r'^watch_new/(?P<id>\d+)/$', 'principal.views.new_view', name="watch_new"),
 )

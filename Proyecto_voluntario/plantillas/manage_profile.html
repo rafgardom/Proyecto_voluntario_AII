@@ -52,7 +52,7 @@
 {% if friends.has_other_pages %}
   <ul class="pagination">
     {% if friends.has_previous %}
-      <li><a href="?page1={{ users.previous_page_number }}">&laquo;</a></li>
+      <li><a href="?page1={{ friends.previous_page_number }}">&laquo;</a></li>
     {% else %}
       <li class="disabled"><span>&laquo;</span></li>
     {% endif %}
