@@ -78,4 +78,16 @@ urlpatterns = patterns('',
 
     #Recommended teams
     url(r'^recommended_teams/$', 'principal.views.recommended_teams', name="recommended_teams"),
+
+    #Add favourite
+    url(r'^add_favourite/(?P<id>\d+)/$', 'principal.views.add_favourite', name="add_favourite"),
+
+    #Erase favourite
+    url(r'^erase_favourite/(?P<id>\d+)/$', 'principal.views.erase_favourite', name="erase_favourite"),
+
+    #Favourite news
+    url(r'^favourite_news/$', 'principal.views.favourite_news', name="favourite_news"),
+
+    #Favourite friend news
+    url(r'^favourite_friend_news/$', 'principal.views.favourite_friend_news', name="favourite_friend_news"),
 )

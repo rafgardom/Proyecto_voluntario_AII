@@ -43,6 +43,13 @@
                      <a href ={% url watch_new new.id  %} class='btn btn-primary'>
                             Ver noticia
                      </a>
+
+                    {% if new not in usuario.favourite_notices.all %}
+                        <br/><br/>
+                         <a href ={% url add_favourite new.id  %} class='btn btn-primary'>
+                                Añadir a favoritos
+                         </a>
+                    {% endif %}
                 </td>
               </tr>
             {% endfor %}

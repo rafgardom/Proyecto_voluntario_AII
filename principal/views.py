@@ -20,6 +20,11 @@ def main_view(request):
     news_list = list(news_list.all())
     shuffle(news_list)
 
+    usuario = None
+
+    if request.user.is_authenticated():
+        usuario = request.user.usuario
+
     page = request.GET.get('page', 1)
 
     paginator = Paginator(news_list, 10)
@@ -30,7 +35,7 @@ def main_view(request):
     except EmptyPage:
         news = paginator.page(paginator.num_pages)
 
-    return render_to_response('home.html', {'request':request, 'news':news})
+    return render_to_response('home.html', {'request':request, 'news':news, 'usuario':usuario})
 
 @staff_member_required
 def populate_teams(request):
@@ -556,7 +561,7 @@ def my_news(request):
         except EmptyPage:
             news = paginator.page(paginator.num_pages)
 
-        return render_to_response('my_news.html', {'request': request, 'news':news})
+        return render_to_response('my_news.html', {'request': request, 'news':news, 'usuario':usuario})
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
@@ -625,6 +630,237 @@ def recommended_teams(request):
             team_list = paginator.page(paginator.num_pages)
 
         return render_to_response('recommended_teams.html', {'request': request, 'team_list':team_list})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+@login_required(login_url='/ingresar')
+def add_favourite(request, id):
+    try:
+        user = request.user
+        usuario = user.usuario
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
+
+        new = Noticia.objects.get(id=id)
+
+        usuario.favourite_notices.add(new)
+
+        favourite_news = usuario.favourite_notices.all()
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(favourite_news, 15)
+        try:
+            news = paginator.page(page)
+        except PageNotAnInteger:
+            news = paginator.page(1)
+        except EmptyPage:
+            news = paginator.page(paginator.num_pages)
+
+        new_list2 = []
+        if request.method == 'POST':
+            formulario = forms.search_notice_form(request.POST)
+            if formulario.is_valid():
+                user = request.user
+                usuario = user.usuario
+                cd = formulario.cleaned_data
+                searched_title_new = usuario.favourite_notices.filter(title__contains=cd.get('param')).all()
+                searched_body_new = usuario.favourite_notices.filter(body__contains=cd.get('param')).all()
+
+                new_list2.extend(searched_body_new)
+                new_list2.extend(searched_title_new)
+
+                new_list2 = list(set(new_list2))
+
+                return render_to_response('favourite_news.html',
+                                          {'news': news, 'request': request, 'new_list2': new_list2,
+                                           'formulario': formulario, 'usuario': usuario},
+                                  context_instance=RequestContext(request))
+            else:
+
+                return render_to_response('favourite_news.html',
+                                          {'news': news, 'request': request, 'new_list2': new_list2,
+                                           'formulario': formulario, 'usuario': usuario},
+                                  context_instance=RequestContext(request))
+        else:
+            formulario = forms.search_notice_form()
+            return render_to_response('favourite_news.html', {'news': news, 'request': request, 'new_list2': new_list2,
+                                                              'formulario': formulario,
+                                                              'usuario': usuario, 'new_add_good': True},
+                                  context_instance=RequestContext(request))
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+@login_required(login_url='/ingresar')
+def erase_favourite(request, id):
+    try:
+        new = Noticia.objects.get(id = id)
+        user = request.user
+        usuario = user.usuario
+        usuario.favourite_notices.remove(new)
+
+        new_list = usuario.favourite_notices.all()
+
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(new_list, 10)
+
+        try:
+            news = paginator.page(page)
+        except PageNotAnInteger:
+            news = paginator.page(1)
+        except EmptyPage:
+            news = paginator.page(paginator.num_pages)
+
+        new_list2 = []
+        if request.method == 'POST':
+            formulario = forms.search_notice_form(request.POST)
+            if formulario.is_valid():
+                user = request.user
+                usuario = user.usuario
+                cd = formulario.cleaned_data
+                searched_title_new = usuario.favourite_notices.filter(title__contains = cd.get('param')).all()
+                searched_body_new = usuario.favourite_notices.filter(body__contains=cd.get('param')).all()
+
+
+                new_list2.extend(searched_body_new)
+                new_list2.extend(searched_title_new)
+
+                new_list2 = list(set(new_list2))
+
+                return render_to_response('favourite_news.html',
+                                          {'news': news, 'request': request, 'new_list2': new_list2,
+                                           'formulario': formulario, 'usuario':usuario},
+                                  context_instance=RequestContext(request))
+            else:
+
+                return render_to_response('favourite_news.html',
+                                          {'news': news, 'request': request, 'new_list2': new_list2, 'formulario':formulario, 'usuario':usuario},
+                                  context_instance=RequestContext(request))
+        else:
+            formulario = forms.search_notice_form()
+            return render_to_response('favourite_news.html', {'news': news, 'request': request, 'new_list2': new_list2, 'formulario':formulario,
+                                                              'usuario':usuario, 'new_delete_good': True},
+                                  context_instance=RequestContext(request))
+
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+@login_required(login_url='/ingresar')
+def favourite_news(request):
+    try:
+
+        user = request.user
+        usuario = user.usuario
+
+        new_list = usuario.favourite_notices.all()
+
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(new_list, 10)
+
+        try:
+            news = paginator.page(page)
+        except PageNotAnInteger:
+            news = paginator.page(1)
+        except EmptyPage:
+            news = paginator.page(paginator.num_pages)
+        new_list2 = []
+        if request.method == 'POST':
+            formulario = forms.search_notice_form(request.POST)
+            if formulario.is_valid():
+                user = request.user
+                usuario = user.usuario
+                cd = formulario.cleaned_data
+                searched_title_new = usuario.favourite_notices.filter(title__contains = cd.get('param')).all()
+                searched_body_new = usuario.favourite_notices.filter(body__contains=cd.get('param')).all()
+
+
+                new_list2.extend(searched_body_new)
+                new_list2.extend(searched_title_new)
+
+                new_list2 = list(set(new_list2))
+
+                return render_to_response('favourite_news.html',
+                                          {'news': news, 'request': request, 'new_list2': new_list2,
+                                           'formulario': formulario, 'usuario':usuario},
+                                  context_instance=RequestContext(request))
+            else:
+
+                return render_to_response('favourite_news.html',
+                                          {'news': news, 'request': request, 'new_list2': new_list2, 'formulario':formulario, 'usuario':usuario},
+                                  context_instance=RequestContext(request))
+        else:
+            formulario = forms.search_notice_form()
+            return render_to_response('favourite_news.html', {'news': news, 'request': request, 'new_list2': new_list2, 'formulario':formulario,
+                                                              'usuario':usuario},
+                                  context_instance=RequestContext(request))
+
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
+
+
+@login_required(login_url='/ingresar')
+def favourite_friend_news(request):
+    try:
+        user = request.user
+        usuario = user.usuario
+
+        new_list = []
+
+        friends = usuario.friends.all()
+
+        for friend in friends:
+            new_list.extend(friend.favourite_notices.all())
+
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(new_list, 10)
+
+        try:
+            news = paginator.page(page)
+        except PageNotAnInteger:
+            news = paginator.page(1)
+        except EmptyPage:
+            news = paginator.page(paginator.num_pages)
+
+        new_list2 = []
+        if request.method == 'POST':
+            formulario = forms.search_notice_form(request.POST)
+            if formulario.is_valid():
+                user = request.user
+                usuario = user.usuario
+                cd = formulario.cleaned_data
+                friends2 = usuario.friends.all()
+                new_list2 = []
+                for friend in friends2:
+                    searched_title_new = friend.favourite_notices.filter(title__contains=cd.get('param')).all()
+                    searched_body_new = friend.favourite_notices.filter(body__contains=cd.get('param')).all()
+                    new_list2.extend(searched_title_new)
+                    new_list2.extend(searched_body_new)
+
+                new_list2 = list(set(new_list2))
+
+                return render_to_response('favourite_news.html',
+                                          {'news': news, 'request': request, 'new_list2': new_list2,
+                                           'formulario': formulario, 'usuario': usuario, 'friend_view':True},
+                                          context_instance=RequestContext(request))
+            else:
+
+                return render_to_response('favourite_news.html',
+                                          {'news': news, 'request': request, 'new_list2': new_list2,
+                                           'formulario': formulario, 'usuario': usuario, 'friend_view':True},
+                                          context_instance=RequestContext(request))
+        else:
+            formulario = forms.search_notice_form()
+            return render_to_response('favourite_news.html', {'news': news, 'request': request, 'new_list2': new_list2,
+                                                              'formulario': formulario,
+                                                              'usuario': usuario, 'friend_view':True},
+                                      context_instance=RequestContext(request))
+
     except:
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))

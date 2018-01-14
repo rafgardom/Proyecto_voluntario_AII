@@ -44,6 +44,7 @@
                 {% if request.user.is_authenticated and not request.user.is_staff%}
                     <li><a href="/my_news/">Mis noticias recomendadas</a></li>
                     <li><a href="/recommended_teams/">Equipos recomendados</a></li>
+                    <li><a href="/favourite_news/">Noticias favoritas</a></li>
                     <li><a href="/profile/">Perfil</a></li>
                 {% endif %}
                 {% if request.user.is_authenticated%}

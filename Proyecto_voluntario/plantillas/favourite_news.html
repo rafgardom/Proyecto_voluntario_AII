@@ -1,0 +1,171 @@
+{% extends 'main.html' %}
+
+{% block titulo_apartado %}
+
+
+{% endblock %}
+
+{% block contenido %}
+
+    {% if new_delete_good %}
+        <div class="alert alert-success">Noticia eliminada de favoritos correctamente</div>
+    {% endif %}
+
+    {% if new_add_good %}
+        <div class="alert alert-success">Noticia añadida a favoritos correctamente</div>
+    {% endif %}
+
+
+    <p><strong><h2>Lista de noticias favoritas</h2></strong></p>
+
+    {% if not friend_view %}
+        <a href ="/favourite_friend_news/" class='btn btn-primary'>
+                                Noticias favoritas de amigos
+         </a>
+        <br/>
+        <br/>
+    {% endif %}
+    <br/>
+    <form id="formulario" method ="post" enctype="multipart/form-data" action="">{% csrf_token %}
+        <table>
+            {{formulario}}
+        </table>
+        <br/>
+        <p><input type="submit" value="Buscar"></p>
+    </form>
+    <br/>
+    {% if new_list2 %}
+        <p><strong><h4>Resultado de la búsqueda</h4></strong></p>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Titular</th>
+              <th>Fecha</th>
+              <th>Equipo</th>
+              <th>Deporte</th>
+              <th>Fuente</th>
+              <th>Gestionar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for new in new_list2 %}
+              <tr>
+                <td>{{ new.title }}</td>
+                <td>{{ new.moment|date:'d-m-Y' }}</td>
+                <td><img src="{{ new.team.image }}" height="50" width="50"/> &nbsp;&nbsp;{{ new.team.name }}</td>
+                <td>{{ new.team.sport.name }}</td>
+                <td>
+                    {% if "marca" in new.url %}
+                        Marca
+                    {% endif %}
+                    {% if "as" in new.url %}
+                        As
+                    {% endif %}
+                    {% if "estadiodeportivo" in new.url %}
+                        Estadio Deportivo
+                    {% endif %}
+                </td>
+                <td>
+                     <a href ={% url watch_new new.id  %} class='btn btn-primary'>
+                            Ver noticia
+                     </a>
+                     {% if new in usuario.favourite_notices.all %}
+                         <br/><br/>
+                         <a href ={% url erase_favourite new.id and not friend_view  %} class='btn btn-primary'>
+                                Eliminar de favoritos
+                         </a>
+                    {% endif %}
+                    {% if new not in usuario.favourite_notices.all and friend_view %}
+                         <br/><br/>
+                         <a href ={% url add_favourite new.id  %} class='btn btn-primary'>
+                                Añadir a favoritos
+                         </a>
+                    {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    {% endif %}
+    <br/>
+    {% if news %}
+        <p><strong><h4>Noticias totales</h4></strong></p>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Titular</th>
+              <th>Fecha</th>
+              <th>Equipo</th>
+              <th>Deporte</th>
+              <th>Fuente</th>
+              <th>Gestionar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for new in news %}
+              <tr>
+                <td>{{ new.title }}</td>
+                <td>{{ new.moment|date:'d-m-Y' }}</td>
+                <td><img src="{{ new.team.image }}" height="50" width="50"/> &nbsp;&nbsp;{{ new.team.name }}</td>
+                <td>{{ new.team.sport.name }}</td>
+                <td>
+                    {% if "marca" in new.url %}
+                        Marca
+                    {% endif %}
+                    {% if "as" in new.url %}
+                        As
+                    {% endif %}
+                    {% if "estadiodeportivo" in new.url %}
+                        Estadio Deportivo
+                    {% endif %}
+                </td>
+                <td>
+                     <a href ={% url watch_new new.id  %} class='btn btn-primary'>
+                            Ver noticia
+                     </a>
+                     {% if new in usuario.favourite_notices.all and not friend_view %}
+                         <br/><br/>
+                         <a href ={% url erase_favourite new.id  %} class='btn btn-primary'>
+                                Eliminar de favoritos
+                         </a>
+                    {% endif %}
+                    {% if new not in usuario.favourite_notices.all and friend_view %}
+                         <br/><br/>
+                         <a href ={% url add_favourite new.id  %} class='btn btn-primary'>
+                                Añadir a favoritos
+                         </a>
+                    {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    {% endif %}
+
+    {% if news.has_other_pages %}
+      <ul class="pagination">
+        {% if news.has_previous %}
+          <li><a href="?page={{ news.previous_page_number }}">&laquo;</a></li>
+        {% else %}
+          <li class="disabled"><span>&laquo;</span></li>
+        {% endif %}
+        {% for i in news.paginator.page_range %}
+          {% if news.number == i %}
+            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+          {% else %}
+            <li><a href="?page={{ i }}">{{ i }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if news.has_next %}
+          <li><a href="?page={{ news.next_page_number }}">&raquo;</a></li>
+        {% else %}
+          <li class="disabled"><span>&raquo;</span></li>
+        {% endif %}
+      </ul>
+    {% endif %}
+
+    {% if not news %}
+        No tiene noticias favoritas actualmente.
+        <br/>
+    {% endif %}
+{% endblock %}

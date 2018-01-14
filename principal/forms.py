@@ -15,3 +15,6 @@ class select_friend_form(forms.Form):
 
 class search_user_form(forms.Form):
     user_name = forms.CharField(max_length=20, required=True, label='Introduzca el nombre de usuario')
+
+class search_notice_form(forms.Form):
+    param = forms.CharField(max_length=60, required=True, label='Introduzca la palabra clave')
