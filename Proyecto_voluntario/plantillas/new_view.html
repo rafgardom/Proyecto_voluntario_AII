@@ -1,0 +1,29 @@
+{% extends 'main.html' %}
+<meta charset="ISO-8859-1">
+{% block titulo_apartado %}
+  <div class="page-header">
+      <h1>{{ new.title }}
+      <small>{{ new.moment|date:'d-m-Y' }}</small></h1>
+  </div> {% endblock %}
+
+{% block contenido %}
+
+    <div class="panel panel-primary">
+      <div class="panel-heading">Cuerpo de la noticia</div>
+      <div class="panel-body">
+        {% if body %}
+          {% for sentence in body %}
+            {{ sentence }}
+            <br/>
+          {% endfor %}
+        {% endif %}
+        {% if not body %}
+            No se ha podido cargar el cuerpo de la noticia. Para visualizarla correctamente haga clic en "Ir a la noticia"
+        {% endif %}
+      </div>
+    </div>
+
+
+    <a class='btn btn-primary' target="_blank" href="{{ new.url }}">Ir a la noticia</a>
+
+{% endblock %}
