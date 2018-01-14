@@ -443,12 +443,14 @@ def noticias_ED():
             if is_new == False:
                 break
 
-def noticias_tenis():
+def noticias_tenis_marca():
     tenis = Deporte.objects.get(name="Tenis")
     equipos = Equipo.objects.filter(sport=tenis)
     is_new = True
     for equipo in equipos:
         url = remove_accents(equipo.url)
+        if "|" in url:
+            url = url.split("|")[1]
         if requests.get(url).status_code == 404:
             continue
         request2 = urllib2.Request(url)
@@ -509,6 +511,53 @@ def noticias_tenis():
                 if is_new == False:
                     break
 
+
+def noticias_tenis_as():
+    tenis = Deporte.objects.get(name="Tenis")
+    equipos = Equipo.objects.filter(sport=tenis)
+    is_new = True
+    for equipo in equipos:
+        if "|" in equipo.url:
+            url = remove_accents(equipo.url)
+            url = url.split("|")[0]
+            if requests.get(url).status_code == 404:
+                continue
+            request2 = urllib2.Request(url)
+            request2.add_header('User-Agent',
+                           'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+            page2 = urllib2.urlopen(request2).read()
+            soup2 = BeautifulSoup(page2, 'html.parser')
+            for noticias in soup2.find_all('div', attrs={"class":"pntc-content"}):
+                title = noticias.find('h2')
+                url3 = noticias.find('a').get('href')
+                stripdate = noticias.find('span',attrs={'class':'fecha'})
+                if stripdate != None:
+                    moment = try_parsing_date(stripdate.get_text())
+                if not "http" in url3:
+                    continue
+                try:
+                    page3 = urllib2.urlopen(url3).read()
+                    soup3 = BeautifulSoup(page3, 'html.parser')
+                    body=[]
+                    row = soup3.find('div',attrs={'itemprop':'articleBody'})
+                    if row != None:
+                        for cuerpo in row.find_all('p'):
+                            body.append(cuerpo.get_text())
+                except:
+                    continue
+    
+                searched_team = Equipo.objects.get(name=equipo.name)
+                loaded_noticia = Noticia.objects.filter(url=url3, team=searched_team)
+    
+                if not loaded_noticia:
+                    Noticia.objects.create(title=title.get_text(), body=body, moment=moment, url=url3, team=equipo)
+    
+                else:
+                    is_new = False
+                    break
+            if is_new == False:
+                break
+                
 def noticias_baloncesto():
     baloncesto = Deporte.objects.get(name="Baloncesto")
     equipos = Equipo.objects.filter(sport=baloncesto)
