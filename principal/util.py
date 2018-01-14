@@ -676,6 +676,8 @@ def noticias_moto():
     is_new=True
     for equipo in equipos:
         url_mgp = equipo.url
+        if "|" in url_mgp:
+            url = url_mgp.split("|")[1]
         url = remove_accents(url_mgp.split("|")[1])
         if requests.get(url).status_code == 404:
             continue
@@ -736,7 +738,52 @@ def noticias_moto():
                         break
                 if is_new == False:
                     break
-       
+
+def noticias_mgp_as():
+    mgp = Deporte.objects.get(name="Moto GP")
+    equipos = Equipo.objects.filter(sport=mgp)
+    is_new = True
+    for equipo in equipos:
+        if "|" in equipo.url:
+            url = equipo.url.split("|")[0]
+            if requests.get(url).status_code == 404:
+                continue
+            request2 = urllib2.Request(url)
+            request2.add_header('User-Agent',
+                           'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+            page2 = urllib2.urlopen(request2).read()
+            soup2 = BeautifulSoup(page2, 'html.parser')
+            for noticias in soup2.find_all('div', attrs={"class":"pntc-content"}):
+                title = noticias.find('h2')
+                url3 = noticias.find('a').get('href')
+                stripdate = noticias.find('span',attrs={'class':'fecha'})
+                if stripdate != None:
+                    moment = try_parsing_date(stripdate.get_text())
+                if not "http" in url3:
+                    continue
+                try:
+                    page3 = urllib2.urlopen(url3).read()
+                    soup3 = BeautifulSoup(page3, 'html.parser')
+                    body=[]
+                    row = soup3.find('div',attrs={'itemprop':'articleBody'})
+                    if row != None:
+                        for cuerpo in row.find_all('p'):
+                            body.append(cuerpo.get_text())
+                except:
+                    continue
+    
+                searched_team = Equipo.objects.get(name=equipo.name)
+                loaded_noticia = Noticia.objects.filter(url=url3, team=searched_team)
+    
+                if not loaded_noticia:
+                    Noticia.objects.create(title=title.get_text(), body=body, moment=moment, url=url3, team=equipo)
+    
+                else:
+                    is_new = False
+                    break
+            if is_new == False:
+                break
+
 def try_parsing_date(text):
     for fmt in ('%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y','%d-%m-%Y','%d/%m/%Y %H:%M','%d-%m-%Y %H:%M'):
         try:

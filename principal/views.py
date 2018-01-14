@@ -40,6 +40,7 @@ def populate_noticias(request):
     util.noticias_moto()
     util.noticias_tenis_as()
     util.noticias_tenis_marca()
+    util.noticias_mgp_as()
     
     return render_to_response('main.html', {'db_status': "Noticias generadas", 'request':request})
 
