@@ -297,12 +297,12 @@ def noticias_futbol_marca():
         i = 0
         if soup2.find('div',attrs={'class':'nav_paginacion'}):
             while i<3:
-                print i
+                #print i
                 equiponame = equipo.name
                 if " " in equiponame:
                     equiponame = equiponame.replace(" ","+")
                 urls3 = "http://cgi.marca.com/buscador/archivo_marca.html?q="+remove_accents(equiponame)+"&t=1&i="+str(i)+"1&n=10&fd=0&td=0&w=65&s=1"
-                print urls3
+                #print urls3
                 i += 1
                 if requests.get(urls3).status_code == 404:
                     continue
@@ -361,42 +361,45 @@ def noticias_futbol_as():
         page2 = urllib2.urlopen(request2).read()
         soup2 = BeautifulSoup(page2, 'html.parser')
         url_noticias = soup2.find('div',attrs={'class':'s-tright'})
-        url2 = "http:"+url_noticias.find('a').get('href')
-        request3 = urllib2.Request(url2)
-        request2.add_header('User-Agent',
-                   'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
-        page3 = urllib2.urlopen(request3).read()
-        soup3 = BeautifulSoup(page3, 'html.parser')
-        for noticias in soup3.find_all('div', attrs={"class":"pntc-content"}):
-            title = noticias.find('h2')
-            url3 = noticias.find('a').get('href')
-            stripdate = noticias.find('span',attrs={'class':'fecha'})
-            if stripdate != None:
-                moment = try_parsing_date(stripdate.get_text())
-            if not "http" in url3:
-                continue
-            try:
-                page4 = urllib2.urlopen(url3).read()
-                soup4 = BeautifulSoup(page4, 'html.parser')
-                body=[]
-                row = soup4.find('div',attrs={'itemprop':'articleBody'})
-                if row != None:
-                    for cuerpo in row.find_all('p'):
-                        body.append(cuerpo.get_text())
-            except:
-                continue
+        try:
+            url2 = "http:"+url_noticias.find('a').get('href')
+            request3 = urllib2.Request(url2)
+            request2.add_header('User-Agent',
+                       'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+            page3 = urllib2.urlopen(request3).read()
+            soup3 = BeautifulSoup(page3, 'html.parser')
+            for noticias in soup3.find_all('div', attrs={"class":"pntc-content"}):
+                title = noticias.find('h2')
+                url3 = noticias.find('a').get('href')
+                stripdate = noticias.find('span',attrs={'class':'fecha'})
+                if stripdate != None:
+                    moment = try_parsing_date(stripdate.get_text())
+                if not "http" in url3:
+                    continue
+                try:
+                    page4 = urllib2.urlopen(url3).read()
+                    soup4 = BeautifulSoup(page4, 'html.parser')
+                    body=[]
+                    row = soup4.find('div',attrs={'itemprop':'articleBody'})
+                    if row != None:
+                        for cuerpo in row.find_all('p'):
+                            body.append(cuerpo.get_text())
+                except:
+                    continue
 
-            searched_team = Equipo.objects.get(name=equipo.name)
-            loaded_noticia = Noticia.objects.filter(url=url3, team=searched_team)
+                searched_team = Equipo.objects.get(name=equipo.name)
+                loaded_noticia = Noticia.objects.filter(url=url3, team=searched_team)
 
-            if not loaded_noticia:
-                Noticia.objects.create(title=title.get_text(), body=body, moment=moment, url=url3, team=equipo)
+                if not loaded_noticia:
+                    Noticia.objects.create(title=title.get_text(), body=body, moment=moment, url=url3, team=equipo)
 
-            else:
-                is_new = False
+                else:
+                    is_new = False
+                    break
+            if is_new == False:
                 break
-        if is_new == False:
-            break
+        except:
+            continue
 
 def noticias_ED():
     futbol = Deporte.objects.get(name="Futbol")
@@ -468,7 +471,7 @@ def noticias_tenis_marca():
                 urls3 = "http://cgi.marca.com/buscador/archivo_marca.html?q="+remove_accents(equiponame)+"&t=1&i="+str(i)+"1&n=10&fd=0&td=0&w=65&s=1"
                 #print urls3
                 i += 1
-                print urls3
+                #print urls3
                 if requests.get(urls3).status_code == 404:
                     continue
                 request3 = urllib2.Request(urls3)
@@ -520,43 +523,46 @@ def noticias_tenis_as():
         if "|" in equipo.url:
             url = remove_accents(equipo.url)
             url = url.split("|")[0]
-            if requests.get(url).status_code == 404:
-                continue
-            request2 = urllib2.Request(url)
-            request2.add_header('User-Agent',
-                           'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
-            page2 = urllib2.urlopen(request2).read()
-            soup2 = BeautifulSoup(page2, 'html.parser')
-            for noticias in soup2.find_all('div', attrs={"class":"pntc-content"}):
-                title = noticias.find('h2')
-                url3 = noticias.find('a').get('href')
-                stripdate = noticias.find('span',attrs={'class':'fecha'})
-                if stripdate != None:
-                    moment = try_parsing_date(stripdate.get_text())
-                if not "http" in url3:
+            try:
+                if requests.get(url).status_code == 404:
                     continue
-                try:
-                    page3 = urllib2.urlopen(url3).read()
-                    soup3 = BeautifulSoup(page3, 'html.parser')
-                    body=[]
-                    row = soup3.find('div',attrs={'itemprop':'articleBody'})
-                    if row != None:
-                        for cuerpo in row.find_all('p'):
-                            body.append(cuerpo.get_text())
-                except:
-                    continue
-    
-                searched_team = Equipo.objects.get(name=equipo.name)
-                loaded_noticia = Noticia.objects.filter(url=url3, team=searched_team)
-    
-                if not loaded_noticia:
-                    Noticia.objects.create(title=title.get_text(), body=body, moment=moment, url=url3, team=equipo)
-    
-                else:
-                    is_new = False
+                request2 = urllib2.Request(url)
+                request2.add_header('User-Agent',
+                               'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
+                page2 = urllib2.urlopen(request2).read()
+                soup2 = BeautifulSoup(page2, 'html.parser')
+                for noticias in soup2.find_all('div', attrs={"class":"pntc-content"}):
+                    title = noticias.find('h2')
+                    url3 = noticias.find('a').get('href')
+                    stripdate = noticias.find('span',attrs={'class':'fecha'})
+                    if stripdate != None:
+                        moment = try_parsing_date(stripdate.get_text())
+                    if not "http" in url3:
+                        continue
+                    try:
+                        page3 = urllib2.urlopen(url3).read()
+                        soup3 = BeautifulSoup(page3, 'html.parser')
+                        body=[]
+                        row = soup3.find('div',attrs={'itemprop':'articleBody'})
+                        if row != None:
+                            for cuerpo in row.find_all('p'):
+                                body.append(cuerpo.get_text())
+                    except:
+                        continue
+
+                    searched_team = Equipo.objects.get(name=equipo.name)
+                    loaded_noticia = Noticia.objects.filter(url=url3, team=searched_team)
+
+                    if not loaded_noticia:
+                        Noticia.objects.create(title=title.get_text(), body=body, moment=moment, url=url3, team=equipo)
+
+                    else:
+                        is_new = False
+                        break
+                if is_new == False:
                     break
-            if is_new == False:
-                break
+            except:
+                continue
                 
 def noticias_baloncesto():
     baloncesto = Deporte.objects.get(name="Baloncesto")
@@ -582,7 +588,7 @@ def noticias_baloncesto():
                 urls3 = "http://cgi.marca.com/buscador/archivo_marca.html?q="+remove_accents(equiponame)+"&t=1&i="+str(i)+"1&n=10&fd=0&td=0&w=65&s=1"
                 #print urls3
                 i += 1
-                print urls3
+                #print urls3
                 if requests.get(urls3).status_code == 404:
                     continue
                 request3 = urllib2.Request(urls3)
@@ -696,7 +702,7 @@ def noticias_moto():
                 urls3 = "http://cgi.marca.com/buscador/archivo_marca.html?q="+remove_accents(equiponame)+"&t=1&i="+str(i)+"1&n=10&fd=0&td=0&w=65&s=1"
                 #print urls3
                 i += 1
-                print urls3
+                #print urls3
                 if requests.get(urls3).status_code == 404:
                     continue
                 request3 = urllib2.Request(urls3)
