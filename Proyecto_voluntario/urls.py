@@ -75,4 +75,7 @@ urlpatterns = patterns('',
 
     #Watch new
     url(r'^watch_new/(?P<id>\d+)/$', 'principal.views.new_view', name="watch_new"),
+
+    #Recommended teams
+    url(r'^recommended_teams/$', 'principal.views.recommended_teams', name="recommended_teams"),
 )

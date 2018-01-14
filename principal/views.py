@@ -80,7 +80,7 @@ def ingresar(request):
             formulario = AuthenticationForm()
         return render_to_response('login.html', {'formulario':formulario, 'user':usuario}, context_instance=RequestContext(request))
     except:
-        return render_to_response('error.html', {'user':usuario},
+        return render_to_response('error.html', {'request':request},
                                     context_instance=RequestContext(request))
 
 def create_account(request):
@@ -435,6 +435,11 @@ def listing_teams_by_country(request, id):
 @login_required(login_url='/ingresar')
 def selected_sport(request,country, id):
     try:
+        user = request.user
+        usuario = user.usuario
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
+
         sport = Deporte.objects.get(id = id)
         user = request.user
         usuario = user.usuario
@@ -514,56 +519,99 @@ def listing_teams(request):
 
 @login_required(login_url='/ingresar')
 def my_news(request):
-    user = request.user
-    usuario = user.usuario
-
-    teams = usuario.favourite_teams.all()
-    news_list = []
-    for team in teams:
-        news = Noticia.objects.filter(team = team).order_by('-moment')
-        news_list.extend(news)
-
-        news_list = list(set(news_list))
-
-    page = request.GET.get('page', 1)
-
-    paginator = Paginator(news_list, 15)
     try:
-        news = paginator.page(page)
-    except PageNotAnInteger:
-        news = paginator.page(1)
-    except EmptyPage:
-        news = paginator.page(paginator.num_pages)
+        user = request.user
+        usuario = user.usuario
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
 
-    return render_to_response('my_news.html', {'request': request, 'news':news})
+        teams = usuario.favourite_teams.all()
+        news_list = []
+        for team in teams:
+            news = Noticia.objects.filter(team = team).order_by('-moment')
+            news_list.extend(news)
+
+            news_list = list(set(news_list))
+
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(news_list, 15)
+        try:
+            news = paginator.page(page)
+        except PageNotAnInteger:
+            news = paginator.page(1)
+        except EmptyPage:
+            news = paginator.page(paginator.num_pages)
+
+        return render_to_response('my_news.html', {'request': request, 'news':news})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
 
 
 @login_required(login_url='/ingresar')
 def new_view(request, id):
     user = request.user
     usuario = user.usuario
-    #try:
-    new = Noticia.objects.get(id = id)
-    body = str(new.body)
-    body = body.split("u'")
     try:
-        del body[0]
-        del body[-1]
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
+
+        new = Noticia.objects.get(id = id)
+        body = str(new.body)
+        body = body.split("u'")
+        try:
+            del body[0]
+            del body[-1]
+        except:
+            pass
+
+        for i in range(len(body)):
+            body[i] = body[i][:-3].decode("unicode_escape")
+
+        for i in range(len(body)):
+            body[i] = body[i].split(", u")
+
+        body = [item for sublist in body for item in sublist]
+
+        return render_to_response('new_view.html', {'request': request, 'new': new, 'body': body})
     except:
-        pass
-
-    for i in range(len(body)):
-        body[i] = body[i][:-3].decode("unicode_escape")
-
-    for i in range(len(body)):
-        body[i] = body[i].split(", u")
-
-    body = [item for sublist in body for item in sublist]
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
 
 
+@login_required(login_url='/ingresar')
+def recommended_teams(request):
+    user = request.user
+    usuario = user.usuario
 
+    try:
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
 
-    return render_to_response('new_view.html', {'request': request, 'new': new, 'body': body})
-    '''except:
-        return render_to_response('error.html', {'user': usuario},
-                                  context_instance=RequestContext(request))'''
+        friends_list = usuario.friends.all()
+        friend_teams = []
+        my_teams = usuario.favourite_teams.all()
+        for friend in friends_list:
+            friend_teams.extend(friend.favourite_teams.all())
+
+        friend_teams = list(set(friend_teams))
+
+        for team in my_teams:
+            if team in friend_teams:
+                friend_teams.remove(team)
+
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(friend_teams, 10)
+        try:
+            team_list = paginator.page(page)
+        except PageNotAnInteger:
+            team_list = paginator.page(1)
+        except EmptyPage:
+            team_list = paginator.page(paginator.num_pages)
+
+        return render_to_response('recommended_teams.html', {'request': request, 'team_list':team_list})
+    except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))
