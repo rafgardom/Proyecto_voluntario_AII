@@ -22,20 +22,24 @@ def main_view(request):
 
     usuario = None
 
-    if request.user.is_authenticated():
-        usuario = request.user.usuario
-
-    page = request.GET.get('page', 1)
-
-    paginator = Paginator(news_list, 10)
     try:
-        news = paginator.page(page)
-    except PageNotAnInteger:
-        news = paginator.page(1)
-    except EmptyPage:
-        news = paginator.page(paginator.num_pages)
+        if request.user.is_authenticated():
+            usuario = request.user.usuario
 
-    return render_to_response('home.html', {'request':request, 'news':news, 'usuario':usuario})
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(news_list, 10)
+        try:
+            news = paginator.page(page)
+        except PageNotAnInteger:
+            news = paginator.page(1)
+        except EmptyPage:
+            news = paginator.page(paginator.num_pages)
+
+        return render_to_response('home.html', {'request':request, 'news':news, 'usuario':usuario})
+
+    except:
+        return render_to_response('home.html', {'request': request, 'usuario': usuario})
 
 @staff_member_required
 def populate_teams(request):

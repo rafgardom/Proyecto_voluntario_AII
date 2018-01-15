@@ -3,11 +3,18 @@
 {% block titulo_apartado %}
   <div class="page-header">
       <h1>Últimas noticias
-      <small>encontraras las últimas novedades deportivas</small></h1>
+          <small>
+              encontraras las últimas novedades deportivas
+          </small>
+      </h1>
   </div> {% endblock %}
 
 {% block contenido %}
-
+    {% if request.user.is_staff %}
+        <div class="alert alert-warning">
+            <strong>¡Cuidado!</strong> Acceso con cuenta administrador
+        </div>
+    {% endif %}
     {% if good_create %}
         <div class="alert alert-success">Cuenta creada correctamente</div>
         <br/>
