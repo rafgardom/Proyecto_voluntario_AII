@@ -69,9 +69,9 @@
                      <a href ={% url watch_new new.id  %} class='btn btn-primary'>
                             Ver noticia
                      </a>
-                     {% if new in usuario.favourite_notices.all %}
+                     {% if new in usuario.favourite_notices.all and not friend_view%}
                          <br/><br/>
-                         <a href ={% url erase_favourite new.id and not friend_view  %} class='btn btn-primary'>
+                         <a href ={% url erase_favourite new.id   %} class='btn btn-primary'>
                                 Eliminar de favoritos
                          </a>
                     {% endif %}
