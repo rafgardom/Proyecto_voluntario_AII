@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from random import shuffle
-import re
+from collections import Counter
 
 
 def main_view(request):
@@ -598,10 +598,15 @@ def new_view(request, id):
                                   context_instance=RequestContext(request))
 
 
+'''Recomienda equipos segun los equipos de los amigos del usuario. Si no dispone de amigos, en base a los equipos agregados a favoritos
+consultando el deporte y el pais de cada uno de ellos elabora un ranking de equipos afines a sus gustos en base a esos dos parametros.
+Se devuelven los 10 equipos mas afines ordenados aleatoriamente. Prioriza los gustos de los amigos con lo que hay mayor probabilidad de
+que muestre los equipos favoritos de los amigos que los recomendados por el sistema'''
 @login_required(login_url='/ingresar')
 def recommended_teams(request):
     user = request.user
     usuario = user.usuario
+    has_friends = False
 
     try:
         if usuario is False or request.user.is_staff:
@@ -610,6 +615,7 @@ def recommended_teams(request):
         friends_list = usuario.friends.all()
         friend_teams = []
         my_teams = usuario.favourite_teams.all()
+
         for friend in friends_list:
             friend_teams.extend(friend.favourite_teams.all())
 
@@ -619,9 +625,66 @@ def recommended_teams(request):
             if team in friend_teams:
                 friend_teams.remove(team)
 
+        if len(friends_list) > 0:
+            has_friends = True
+
+        if (len(friends_list) == 0 or len(friend_teams) < 10) and len(my_teams) > 0:
+            countries = []
+            sport_names = []
+            my_teams_names = []
+            for team in my_teams:
+                countries.append(team.country)
+                sport_names.append(team.sport.name)
+                my_teams_names.append(team.name)
+
+                sport_names.sort(key=Counter(sport_names).get, reverse=True)
+            countries.sort(key=Counter(countries).get, reverse=True)
+            countries = list(countries)
+            recommended_team_list = []
+
+            if not has_friends:
+                del friend_teams[:]
+
+            for sport_name in sport_names:
+                team_names_friend_list = [team.name for team in friend_teams]
+                sport = Deporte.objects.get(name=sport_name)
+                recommended_team_list = Equipo.objects.filter(sport=sport, country=countries[0]).exclude(
+                    name__in=my_teams_names).exclude(name__in=team_names_friend_list).all()
+
+                if len(recommended_team_list) == 0:
+                    recommended_team_list = Equipo.objects.filter(sport=sport).exclude(
+                        name__in=my_teams_names).all()
+
+                recommended_team_list = list(recommended_team_list)
+                shuffle(recommended_team_list)
+
+                if len(friend_teams) <= 10 and len(recommended_team_list) >= 5:
+                    friend_teams.extend(recommended_team_list[:3])
+                    friend_teams = list(set(friend_teams))
+
+                elif len(friend_teams) <= 10:
+                    friend_teams.extend(recommended_team_list)
+                    friend_teams = list(set(friend_teams))
+
+                if len(friend_teams) == 10:
+                    break
+            while len(friend_teams) < 10:
+                team_names = [team.name for team in friend_teams]
+                shuffle(sport_names)
+                sport = Deporte.objects.get(name = sport_names[0])
+                added_teams = Equipo.objects.filter(sport = sport).exclude(name__in=team_names).exclude(name__in=my_teams_names)
+                added_teams = list(added_teams)
+                shuffle(added_teams)
+                sub_added_teams = added_teams[:1]
+                friend_teams.extend(sub_added_teams)
+
         page = request.GET.get('page', 1)
 
-        paginator = Paginator(friend_teams, 10)
+        if len(friend_teams) >= 10:
+            paginator = Paginator(friend_teams[:10], 10)
+        else:
+            paginator = Paginator(friend_teams, 10)
+
         try:
             team_list = paginator.page(page)
         except PageNotAnInteger:
