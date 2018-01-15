@@ -571,12 +571,9 @@ def my_news(request):
                                   context_instance=RequestContext(request))
 
 
-@login_required(login_url='/ingresar')
 def new_view(request, id):
-    user = request.user
-    usuario = user.usuario
     try:
-        if usuario is False or request.user.is_staff:
+        if request.user.is_staff:
             raise Exception('Accion no permitida')
 
         new = Noticia.objects.get(id = id)
