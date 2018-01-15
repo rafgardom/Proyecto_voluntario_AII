@@ -18,7 +18,7 @@ from collections import Counter
 def main_view(request):
     news_list = Noticia.objects.all().order_by("-moment")[:300]
     news_list = list(news_list.all())
-    shuffle(news_list)
+    #shuffle(news_list)
 
     usuario = None
 

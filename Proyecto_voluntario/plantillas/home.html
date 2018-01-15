@@ -42,10 +42,10 @@
                 <td><img src="{{ new.team.image }}" height="50" width="50"/> &nbsp;&nbsp;{{ new.team.name }}</td>
                 <td>{{ new.team.sport.name }}</td>
                 <td>
-                    {% if "marca" in new.url %}
+                    {% if "marca" in new.url and "estadiodeportivo" not in new.url%}
                         Marca
                     {% endif %}
-                    {% if "as" in new.url %}
+                    {% if "as" in new.url and "marca" not in new.url and "estadiodeportivo" not in new.url%}
                         As
                     {% endif %}
                     {% if "estadiodeportivo" in new.url %}
