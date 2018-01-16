@@ -421,7 +421,7 @@ def listing_teams_by_country_global(request, id):
     sport = Deporte.objects.get(id=id)
     user = request.user
 
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() and not request.user.is_staff:
         usuario = request.user.usuario
     else:
         usuario = None

@@ -13,9 +13,15 @@
     {% if not global_news%}
          Deportes
     {% endif %}
+
 {% endblock %}
 
 {% block contenido %}
+    {% if request.user.is_staff %}
+        <div class="alert alert-warning">
+            <strong>¡Cuidado!</strong> Acceso con cuenta administrador
+        </div>
+    {% endif %}
     {% if sports %}
         <p><strong><h2>Lista de deportes</h2></strong></p>
     {% endif %}
