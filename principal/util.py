@@ -318,10 +318,8 @@ def noticias_futbol_marca():
                             stripdate = soup4.find('time', attrs={'itemprop': 'dateModified'})
                             if stripdate != None:
                                 moment = try_parsing_date(stripdate.get_text().replace('CET', '').strip())
-                                print moment
                                 if moment == None:
                                     moment = try_parsing_date(stripdate.get_text().replace('CST', '').strip())
-                                    print moment
                             else:
                                 moment = None
                             body=[]
@@ -490,7 +488,6 @@ def noticias_tenis_marca():
                             page4 = urllib2.urlopen(url3).read()
                             soup4 = BeautifulSoup(page4, 'html.parser')
                             stripdate = soup4.find('time',attrs={'itemprop':'dateModified'})
-                            print stripdate.get_text()
                             if stripdate != None:
                                 moment = try_parsing_date(stripdate.get_text().replace('CET', '').strip())
                                 if moment == None:
