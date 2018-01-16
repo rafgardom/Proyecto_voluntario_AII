@@ -626,11 +626,36 @@ def recommended_teams(request):
         if len(friends_list) > 0:
             has_friends = True
 
+        sports_friend_teams = [team.sport for team in friend_teams]
+        sports_my_teams = [team.sport for team in my_teams]
+
         if has_friends:
             for team in my_teams:
                 if team in friend_teams:
                     friend_teams.remove(team)
+                '''my_team_sport = team.sport
+                print "My sport = ", my_team_sport
 
+                if len(friend_teams) > 0:
+                    if my_team_sport not in sports_friend_teams:
+                        
+
+                cont += 1'''
+
+        sports_my_teams_set = set(sports_my_teams)
+        sports_friend_teams_set = set(sports_friend_teams)
+
+        concat = sports_my_teams_set.intersection(sports_friend_teams_set)
+
+        if len(concat) > 0:
+            result_list = []
+            for c in concat:
+                for t in friend_teams:
+                    if t.sport == c:
+                        result_list.append(t)
+            friend_teams = result_list
+        else:
+            del friend_teams[:]
 
         if (len(friends_list) == 0 or len(friend_teams) < 10) and len(my_teams) > 0:
             countries = []
@@ -685,6 +710,7 @@ def recommended_teams(request):
         page = request.GET.get('page', 1)
 
         if len(friend_teams) >= 10:
+            shuffle(friend_teams)
             paginator = Paginator(friend_teams[:10], 10)
         else:
             paginator = Paginator(friend_teams, 10)
