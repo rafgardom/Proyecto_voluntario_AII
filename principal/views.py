@@ -549,11 +549,19 @@ def my_news(request):
 
         teams = usuario.favourite_teams.all()
         news_list = []
+        news_none_moment_list = []
         for team in teams:
-            news = Noticia.objects.filter(team = team).order_by('-moment')
+            news = Noticia.objects.filter(team = team).exclude(moment = None).order_by('-moment')
+            news_none_moments = Noticia.objects.filter(team=team).filter(moment=None)
+            news_none_moment_list.extend(news_none_moments)
             news_list.extend(news)
 
             news_list = list(set(news_list))
+            news_none_moment_list = list(set(news_none_moment_list))
+
+        shuffle(news_list)
+        news_list = sorted(news_list, key=lambda x: x.moment, reverse=True)
+        news_list.extend(news_none_moment_list)
 
 
         page = request.GET.get('page', 1)
