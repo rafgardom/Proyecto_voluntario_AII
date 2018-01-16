@@ -21,24 +21,10 @@ def main_view(request):
 
     usuario = None
 
-    try:
-        if request.user.is_authenticated():
-            usuario = request.user.usuario
+    sports = Deporte.objects.all()
 
-        page = request.GET.get('page', 1)
+    return render_to_response('select_sport.html', {'sports': sports, 'request': request, 'global_news':True})
 
-        paginator = Paginator(news_list, 10)
-        try:
-            news = paginator.page(page)
-        except PageNotAnInteger:
-            news = paginator.page(1)
-        except EmptyPage:
-            news = paginator.page(paginator.num_pages)
-
-        return render_to_response('home.html', {'request':request, 'news':news, 'usuario':usuario})
-
-    except:
-        return render_to_response('home.html', {'request': request, 'usuario': usuario})
 
 @staff_member_required
 def populate_teams(request):
@@ -307,29 +293,6 @@ def add_team(request, id):
         return render_to_response('error.html', {'request': request},
                                   context_instance=RequestContext(request))
 
-''''@login_required(login_url='/ingresar')
-def listing_users(request):
-
-    user = request.user
-    usuario = user.usuario
-    friends = usuario.friends
-    user_list = Usuario.objects.all().exclude(id=usuario.id).exclude(id__in=[friend.id for friend in friends.all()])
-
-    user_list.exclude(id = usuario.id)
-    user_list.exclude(id__in=[friend.id for friend in friends.all()])
-
-    page = request.GET.get('page', 1)
-
-    paginator = Paginator(user_list, 10)
-    try:
-        users = paginator.page(page)
-    except PageNotAnInteger:
-        users = paginator.page(1)
-    except EmptyPage:
-        users = paginator.page(paginator.num_pages)
-
-    return render_to_response('add_friend.html', {'users': users, 'request': request})'''
-
 
 @login_required(login_url='/ingresar')
 def listing_users_search_box(request):
@@ -453,6 +416,44 @@ def listing_teams_by_country(request, id):
                                   context_instance=RequestContext(request))
 
 
+def listing_teams_by_country_global(request, id):
+
+    sport = Deporte.objects.get(id=id)
+    user = request.user
+
+    if request.user.is_authenticated():
+        usuario = request.user.usuario
+    else:
+        usuario = None
+
+    teams = Equipo.objects.filter(sport = sport).all()
+    news_list = []
+    for team in teams:
+        team_notices = Noticia.objects.filter(team = team).exclude(moment=None).all()
+        news_list.extend(team_notices)
+    shuffle(news_list)
+    news_list = sorted(news_list, key=lambda x: x.moment, reverse=True)
+    #try:
+
+
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(news_list[:500], 10)
+    try:
+        news = paginator.page(page)
+    except PageNotAnInteger:
+        news = paginator.page(1)
+    except EmptyPage:
+        news = paginator.page(paginator.num_pages)
+
+    return render_to_response('home.html', {'request': request, 'news': news, 'usuario': usuario})
+
+
+    '''except:
+        return render_to_response('error.html', {'request': request},
+                                  context_instance=RequestContext(request))'''
+
+
 @login_required(login_url='/ingresar')
 def selected_sport(request,country, id):
     try:
@@ -540,36 +541,35 @@ def listing_teams(request):
 
 @login_required(login_url='/ingresar')
 def my_news(request):
-    #try:
-    user = request.user
-    usuario = user.usuario
-    if usuario is False or request.user.is_staff:
-        raise Exception('Accion no permitida')
-
-    teams = usuario.favourite_teams.all()
-    news_list = []
-    for team in teams:
-        news = Noticia.objects.filter(team = team).order_by('-moment')
-        news_list.extend(news)
-
-        news_list = list(set(news_list))
-
-    #sorted(news_list, key=lambda x: x.moment, reverse=True)
-
-    page = request.GET.get('page', 1)
-
-    paginator = Paginator(news_list, 15)
     try:
-        news = paginator.page(page)
-    except PageNotAnInteger:
-        news = paginator.page(1)
-    except EmptyPage:
-        news = paginator.page(paginator.num_pages)
+        user = request.user
+        usuario = user.usuario
+        if usuario is False or request.user.is_staff:
+            raise Exception('Accion no permitida')
 
-    return render_to_response('my_news.html', {'request': request, 'news':news, 'usuario':usuario})
-    '''except:
+        teams = usuario.favourite_teams.all()
+        news_list = []
+        for team in teams:
+            news = Noticia.objects.filter(team = team).order_by('-moment')
+            news_list.extend(news)
+
+            news_list = list(set(news_list))
+
+
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(news_list, 15)
+        try:
+            news = paginator.page(page)
+        except PageNotAnInteger:
+            news = paginator.page(1)
+        except EmptyPage:
+            news = paginator.page(paginator.num_pages)
+
+        return render_to_response('my_news.html', {'request': request, 'news':news, 'usuario':usuario})
+    except:
         return render_to_response('error.html', {'request': request},
-                                  context_instance=RequestContext(request))'''
+                                  context_instance=RequestContext(request))
 
 
 def new_view(request, id):
@@ -603,7 +603,8 @@ def new_view(request, id):
 '''Recomienda equipos segun los equipos de los amigos del usuario. Si no dispone de amigos, en base a los equipos agregados a favoritos
 consultando el deporte y el pais de cada uno de ellos elabora un ranking de equipos afines a sus gustos en base a esos dos parametros.
 Se devuelven los 10 equipos mas afines ordenados aleatoriamente. Prioriza los gustos de los amigos con lo que hay mayor probabilidad de
-que muestre los equipos favoritos de los amigos que los recomendados por el sistema'''
+que muestre los equipos favoritos de los amigos que los recomendados por el sistema. Si el usuario no dispone de equipos favoritos se pasara
+a recomendar directamente los equipos de los amigos'''
 @login_required(login_url='/ingresar')
 def recommended_teams(request):
     user = request.user
@@ -621,6 +622,7 @@ def recommended_teams(request):
         for friend in friends_list:
             friend_teams.extend(friend.favourite_teams.all())
 
+        friend_teams_copy = list(set(friend_teams))
         friend_teams = list(set(friend_teams))
 
         if len(friends_list) > 0:
@@ -708,6 +710,10 @@ def recommended_teams(request):
                 friend_teams.extend(sub_added_teams)
 
         page = request.GET.get('page', 1)
+
+        if len(friend_teams) == 0:
+            friend_teams = friend_teams_copy
+            shuffle(friend_teams)
 
         if len(friend_teams) >= 10:
             shuffle(friend_teams)

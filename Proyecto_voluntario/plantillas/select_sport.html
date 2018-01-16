@@ -1,6 +1,19 @@
 {% extends 'main.html' %}
 
-{% block titulo_apartado %} Deportes {% endblock %}
+{% block titulo_apartado %}
+    {% if global_news %}
+      <div class="page-header">
+          <h1>Últimas noticias
+              <small>
+                  encontraras las últimas novedades deportivas
+              </small>
+          </h1>
+      </div>
+    {% endif %}
+    {% if not global_news%}
+         Deportes
+    {% endif %}
+{% endblock %}
 
 {% block contenido %}
     {% if sports %}
@@ -23,9 +36,16 @@
               <tr>
                 <td>{{ sport.name }}</td>
                 <td>
+                    {% if global_news %}
+                        <a href ={% url selected_sport_global sport.id  %} class='btn btn-primary'>
+                                Seleccionar deporte
+                        </a>
+                    {% endif %}
+                    {% if not global_news %}
                      <a href ={% url selected_sport sport.id  %} class='btn btn-primary'>
                                 Seleccionar deporte
                      </a>
+                    {% endif %}
                 </td>
               </tr>
             {% endfor %}
@@ -46,27 +66,29 @@
               <tr>
                 <td>{{ country.0 }}</td>
                 <td>
-                    {% if country.0 == "EE.UU." %}
-                        <a href ={% url selected_sport_country1 country.0  sport_id  %} class='btn btn-primary'>
-                                    Seleccionar país
-                         </a>
-                    {% endif %}
-                    {% if "(" in country.0 %}
-                        <a href ={% url selected_sport_country2 country.0  sport_id  %} class='btn btn-primary'>
-                                    Seleccionar país
-                         </a>
-                    {% endif %}
+                    {% if not global_news %}
+                        {% if country.0 == "EE.UU." %}
+                            <a href ={% url selected_sport_country1 country.0  sport_id  %} class='btn btn-primary'>
+                                        Seleccionar país
+                             </a>
+                        {% endif %}
+                        {% if "(" in country.0 %}
+                            <a href ={% url selected_sport_country2 country.0  sport_id  %} class='btn btn-primary'>
+                                        Seleccionar país
+                             </a>
+                        {% endif %}
 
-                    {% if " " in country.0 %}
-                        <a href ={% url selected_sport_country3 country.0  sport_id  %} class='btn btn-primary'>
-                                    Seleccionar país
-                         </a>
-                    {% endif %}
+                        {% if " " in country.0 %}
+                            <a href ={% url selected_sport_country3 country.0  sport_id  %} class='btn btn-primary'>
+                                        Seleccionar país
+                             </a>
+                        {% endif %}
 
-                    {% if country.0 != "EE.UU." and "(" not in country.0 and " " not in country.0%}
-                        <a href ={% url selected_sport_country4 country.0  sport_id  %} class='btn btn-primary'>
-                                    Seleccionar país
-                         </a>
+                        {% if country.0 != "EE.UU." and "(" not in country.0 and " " not in country.0%}
+                            <a href ={% url selected_sport_country4 country.0  sport_id  %} class='btn btn-primary'>
+                                        Seleccionar país
+                             </a>
+                        {% endif %}
                     {% endif %}
                 </td>
               </tr>

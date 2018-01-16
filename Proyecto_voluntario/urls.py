@@ -52,6 +52,9 @@ urlpatterns = patterns('',
     #Select sport
     url(r'^selected_sport/(?P<id>\d+)/$', 'principal.views.listing_teams_by_country', name="selected_sport"),
 
+    #Select sport global
+    url(r'^selected_sport_global/(?P<id>\d+)/$', 'principal.views.listing_teams_by_country_global', name="selected_sport_global"),
+
     #Select sport by country1
     url(r'^selected_sport_country/(?P<country>\w+?\W+?\w+?\W+)(?P<id>\d+)/$', 'principal.views.selected_sport', name="selected_sport_country1"),
 
