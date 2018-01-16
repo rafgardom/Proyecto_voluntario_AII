@@ -295,6 +295,8 @@ def noticias_futbol_marca():
         page2 = urllib2.urlopen(request2).read()
         soup2 = BeautifulSoup(page2, 'html.parser')
         i = 0
+        moment = None
+        body = None
         if soup2.find('div',attrs={'class':'nav_paginacion'}):
             while i<3:
                 #print i
@@ -322,15 +324,19 @@ def noticias_futbol_marca():
                         try:
                             page4 = urllib2.urlopen(url3).read()
                             soup4 = BeautifulSoup(page4, 'html.parser')
-                            stripdate = soup3.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']})
+                            stripdate = soup4.find('time', attrs={'itemprop': 'dateModified'})
                             if stripdate != None:
-                                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                                #print moment
+                                moment = try_parsing_date(stripdate.get_text().replace('CET', '').strip())
+                                print moment
+                                if moment == None:
+                                    moment = try_parsing_date(stripdate.get_text().replace('CST', '').strip())
+                                    print moment
+                            else:
+                                moment = None
                             body=[]
                             for row in soup4.find_all('div',attrs={'itemprop':'articleBody'}):
                                 for cuerpo in row.find_all('p'):
                                     body.append(cuerpo.get_text())
-                            #print body
                         except:
                             continue
                         
@@ -479,6 +485,8 @@ def noticias_tenis_marca():
                                'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.13) Gecko/2009073022 Firefox/3.0.13')
                 page3 = urllib2.urlopen(request3).read()
                 soup3 = BeautifulSoup(page3, 'html.parser')
+                moment = None
+                body = None
                 for noticias in soup3.find_all('div',attrs={'class':'texto-foto'}):
                     #print noticias
                     title = noticias.find('h4')
@@ -490,10 +498,14 @@ def noticias_tenis_marca():
                         try:
                             page4 = urllib2.urlopen(url3).read()
                             soup4 = BeautifulSoup(page4, 'html.parser')
-                            stripdate = soup3.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']})
+                            stripdate = soup4.find('time',attrs={'itemprop':'dateModified'})
+                            print stripdate.get_text()
                             if stripdate != None:
-                                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                                #print moment
+                                moment = try_parsing_date(stripdate.get_text().replace('CET', '').strip())
+                                if moment == None:
+                                    moment = try_parsing_date(stripdate.get_text().replace('CST', '').strip())
+                            else:
+                                moment = None
                             body=[]
                             for row in soup4.find_all('div',attrs={'itemprop':'articleBody'}):
                                 for cuerpo in row.find_all('p'):
@@ -504,7 +516,6 @@ def noticias_tenis_marca():
                         
                     searched_team = Equipo.objects.get(name=equipo.name)
                     loaded_noticia = Noticia.objects.filter(url=url3, team=searched_team)
-        
                     if not loaded_noticia:
                         Noticia.objects.create(title=title.get_text(), body=body, moment=moment, url=url3, team=equipo)
         
@@ -607,10 +618,13 @@ def noticias_baloncesto():
                         try:
                             page4 = urllib2.urlopen(url3).read()
                             soup4 = BeautifulSoup(page4, 'html.parser')
-                            stripdate = soup3.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']})
+                            stripdate = soup4.find('time', attrs={'itemprop': 'dateModified'})
                             if stripdate != None:
-                                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                                #print moment
+                                moment = try_parsing_date(stripdate.get_text().replace('CET', '').strip())
+                                if moment == None:
+                                    moment = try_parsing_date(stripdate.get_text().replace('CST', '').strip())
+                            else:
+                                moment = None
                             body=[]
                             for row in soup4.find_all('div',attrs={'itemprop':'articleBody'}):
                                 for cuerpo in row.find_all('p'):
@@ -651,10 +665,13 @@ def noticias_f1():
                     try:
                         page2 = urllib2.urlopen(url2).read()
                         soup2 = BeautifulSoup(page2, 'html.parser')
-                        stripdate = soup2.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']})
+                        stripdate = soup2.find('time', attrs={'itemprop': 'dateModified'})
                         if stripdate != None:
-                            moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                            #print moment
+                            moment = try_parsing_date(stripdate.get_text().replace('CET', '').strip())
+                            if moment == None:
+                                moment = try_parsing_date(stripdate.get_text().replace('CST', '').strip())
+                        else:
+                            moment = None
                         for row in soup2.find_all('div',attrs={'class':'row'}):
                             body = []
                             for cuerpo in row.find_all('p'):
@@ -721,10 +738,13 @@ def noticias_moto():
                         try:
                             page4 = urllib2.urlopen(url3).read()
                             soup4 = BeautifulSoup(page4, 'html.parser')
-                            stripdate = soup3.find(attrs={'class':['fecha','date','center col-md-4','panel-heading']})
+                            stripdate = soup4.find('time', attrs={'itemprop': 'dateModified'})
                             if stripdate != None:
-                                moment = try_parsing_date(stripdate.get_text().replace('CET','').strip())
-                                #print moment
+                                moment = try_parsing_date(stripdate.get_text().replace('CET', '').strip())
+                                if moment == None:
+                                    moment = try_parsing_date(stripdate.get_text().replace('CST', '').strip())
+                            else:
+                                moment = None
                             body=[]
                             for row in soup4.find_all('div',attrs={'itemprop':'articleBody'}):
                                 for cuerpo in row.find_all('p'):
