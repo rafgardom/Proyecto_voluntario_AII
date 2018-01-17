@@ -617,7 +617,7 @@ a recomendar directamente los equipos de los amigos'''
 def recommended_teams(request):
     user = request.user
     usuario = user.usuario
-    has_friends = False
+    has_friends = True
 
     try:
         if usuario is False or request.user.is_staff:
@@ -633,8 +633,8 @@ def recommended_teams(request):
         friend_teams_copy = list(set(friend_teams))
         friend_teams = list(set(friend_teams))
 
-        if len(friends_list) > 0:
-            has_friends = True
+        if len(friends_list) == 0:
+            has_friends = False
 
         sports_friend_teams = [team.sport for team in friend_teams]
         sports_my_teams = [team.sport for team in my_teams]
@@ -643,14 +643,6 @@ def recommended_teams(request):
             for team in my_teams:
                 if team in friend_teams:
                     friend_teams.remove(team)
-                '''my_team_sport = team.sport
-                print "My sport = ", my_team_sport
-
-                if len(friend_teams) > 0:
-                    if my_team_sport not in sports_friend_teams:
-                        
-
-                cont += 1'''
 
         sports_my_teams_set = set(sports_my_teams)
         sports_friend_teams_set = set(sports_friend_teams)
@@ -698,7 +690,7 @@ def recommended_teams(request):
                 shuffle(recommended_team_list)
 
                 if len(friend_teams) <= 10 and len(recommended_team_list) >= 5:
-                    friend_teams.extend(recommended_team_list[:3])
+                    friend_teams.extend(recommended_team_list[:4])
                     friend_teams = list(set(friend_teams))
 
                 elif len(friend_teams) <= 10:
@@ -719,9 +711,14 @@ def recommended_teams(request):
 
         page = request.GET.get('page', 1)
 
-        if len(friend_teams) == 0:
+        if len(friend_teams) == 0 and has_friends:
             friend_teams = friend_teams_copy
             shuffle(friend_teams)
+        elif len(friend_teams) == 0:
+            friend_teams = Equipo.objects.all()
+            friend_teams = list(friend_teams)
+            shuffle(friend_teams)
+
 
         if len(friend_teams) >= 10:
             shuffle(friend_teams)

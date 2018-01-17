@@ -13,7 +13,10 @@
 
 </head>
 <body>
- <img src="http://nsdelvalle.com/sites/nsdelvalle.com/files/pagina/2016/09/fondo.jpg" alt="Smiley face" height="100" width="300"/>
+<div style="width: 960px; margin-left: auto; margin-right: auto">
+    <img src="http://nsdelvalle.com/sites/nsdelvalle.com/files/pagina/2016/09/fondo.jpg" alt="Smiley face" height="150" width="100%"/>
+</div>
+
 <div style="background-color:lightblue">
     {% if request.user.is_authenticated  %}
         Bienvenido {{ request.user }}
