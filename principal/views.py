@@ -714,12 +714,7 @@ def recommended_teams(request):
         if len(friend_teams) == 0 and has_friends:
             friend_teams = friend_teams_copy
             shuffle(friend_teams)
-        elif len(friend_teams) == 0:
-            friend_teams = Equipo.objects.all()
-            friend_teams = list(friend_teams)
-            shuffle(friend_teams)
-
-
+        
         if len(friend_teams) >= 10:
             shuffle(friend_teams)
             paginator = Paginator(friend_teams[:10], 10)
