@@ -18,7 +18,7 @@
 
     <p><strong><h2>Lista de noticias favoritas</h2></strong></p>
 
-    {% if not friend_view %}
+    {% if not friend_view and usuario.friends.all %}
         <a href ="/favourite_friend_news/" class='btn btn-primary'>
                                 Noticias favoritas de amigos
          </a>
